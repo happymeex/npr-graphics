@@ -1,7 +1,7 @@
 #ifndef UTIL_PNG
 #define UTIL_PNG
 
-#include "../../external/lodepng.h"
+#include <lodepng.h>
 #include <string>
 #include <vector>
 

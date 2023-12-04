@@ -2,7 +2,7 @@
 CC = g++
 
 # compiler flags
-FLAGS = -g -Wall -Werror -std=c++17 -Wno-unused-variable
+FLAGS = -g -Wall -Werror -std=c++17 -Wno-unused-variable -Iexternal
 
 all: main
 

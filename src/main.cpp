@@ -1,4 +1,5 @@
 #include "util/png.hpp"
+#include <glm/glm.hpp>
 #include <iostream>
 #include <vector>
 
@@ -15,5 +16,7 @@ int main() {
     // lodepng::encode("out/out.png", image, width, height);
     save_png("out.png", image, width, height);
     std::cout << "Hello, World!" << std::endl;
+    glm::vec3 v(1.0f, 2.0f, 3.0f);
+    std::cout << v.x << " " << v.y << " " << v.z << std::endl;
     return 0;
 }
