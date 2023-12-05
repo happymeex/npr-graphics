@@ -4,8 +4,19 @@
 #include "Camera.hpp"
 #include "HitRecord.hpp"
 #include "Scene.hpp"
+#include "Image.hpp"
 #include <glm/glm.hpp>
 #include <string>
+
+enum class RenderStyle {
+  Beta,
+  Cel,
+  Real,
+};
+
+const glm::mat3 GX(1, 2, 1, 0, 0, 0, -1, -2, -1);
+const glm::mat3 GY(1, 0, -1, 2, 0, -2, 1, 0, -1);
+const glm::mat3 GAUSS(1, 2, 1, 2, 4, 2, 1, 2, 1);
 
 class Tracer {
   public:
@@ -16,6 +27,8 @@ class Tracer {
     void Render(const Scene &scene, const std::string &out_file_name);
 
   private:
+    Image RenderOnce(RenderStyle style);
+
     Camera camera_;
     int width_;
     int height_;
@@ -23,7 +36,7 @@ class Tracer {
     int max_bounces_;
     const Scene *scene_;
 
-    glm::vec3 TraceRay(const Ray &ray, int bounces, HitRecord &hit_record);
+    glm::vec3 TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, RenderStyle style);
 };
 
 #endif
