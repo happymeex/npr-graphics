@@ -1,11 +1,43 @@
 #include "Mesh.hpp"
 
+#include "Shapes.hpp"
 #include "util.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
-namespace NPR {
+void Mesh::UpdateTriangles() {
+    triangles.clear();
+    for (size_t i = 0; i < indices->size(); i += 3) {
+        Triangle triangle = Triangle{
+            vertices->at(indices->at(i)),     vertices->at(indices->at(i + 1)),
+            vertices->at(indices->at(i + 2)), normals->at(indices->at(i)),
+            normals->at(indices->at(i + 1)),  normals->at(indices->at(i + 2))};
+        triangles.push_back(triangle);
+    }
+}
+
+void Mesh::UpdateNormals() {
+    normals->clear();
+    normals->resize(vertices->size(), glm::vec3(0.0f, 0.0f, 0.0f));
+    for (size_t i = 0; i < indices->size(); i += 3) {
+        int v1 = indices->at(i);
+        int v2 = indices->at(i + 1);
+        int v3 = indices->at(i + 2);
+        auto &p1 = vertices->at(v1);
+        auto &p2 = vertices->at(v2);
+        auto &p3 = vertices->at(v3);
+        glm::vec3 n = glm::cross(p2 - p1, p3 - p1);
+        normals->at(v1) += n;
+        normals->at(v2) += n;
+        normals->at(v3) += n;
+    }
+
+    for (auto &n : *normals) {
+        n = glm::normalize(n);
+    }
+}
+
 Mesh load_mesh_from_obj(const std::string &file_name) {
     std::fstream file("assets/obj/" + file_name);
     if (!file) {
@@ -81,13 +113,18 @@ Mesh load_mesh_from_obj(const std::string &file_name) {
             indices.size() - current_group.start_face_index;
         mesh.groups.push_back(std::move(current_group));
     }
-    current_group.num_indices = indices.size() - current_group.start_face_index;
-    mesh.groups.push_back(current_group);
 
     mesh.vertices = std::make_unique<std::vector<glm::vec3>>(vertices);
     mesh.normals = std::make_unique<std::vector<glm::vec3>>(normals);
     mesh.indices = std::make_unique<std::vector<unsigned int>>(indices);
     mesh.tex_coords = std::make_unique<std::vector<glm::vec2>>(tex_coords);
+
+    if (mesh.normals->empty()) {
+        // normals not provided, compute them based on vertices and faces
+        std::cout << "Computing normals..." << std::endl;
+        mesh.UpdateNormals();
+    }
+    mesh.UpdateTriangles();
 
     // TODO: associate materials
     for (auto &g : mesh.groups) {
@@ -96,5 +133,3 @@ Mesh load_mesh_from_obj(const std::string &file_name) {
 
     return mesh;
 }
-
-} // namespace NPR

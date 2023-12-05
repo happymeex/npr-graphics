@@ -2,12 +2,12 @@
 #define MESH
 
 #include "Material.hpp"
+#include "Shapes.hpp"
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace NPR {
 struct MeshGroup {
     std::string name;
     size_t start_face_index;
@@ -16,13 +16,27 @@ struct MeshGroup {
     std::shared_ptr<Material> material;
 };
 
-struct Mesh {
+class Mesh {
+  public:
     std::unique_ptr<std::vector<glm::vec3>> vertices;
     std::unique_ptr<std::vector<glm::vec3>> normals;
     std::unique_ptr<std::vector<unsigned int>> indices;
     std::unique_ptr<std::vector<glm::vec2>> tex_coords;
+    /**
+     * Updates the triangles of the mesh according to current values in
+     * `vertices`, `indices`, and `normals`.
+     */
+    void UpdateTriangles();
+    /**
+     * Computes the normals of the mesh by using the weighted average of the
+     * normals of triangles incident on each vertex.
+     * Does not depend on `triangles` being updated, only `vertices` and
+     * `indices`.
+     */
+    void UpdateNormals();
 
     std::vector<MeshGroup> groups;
+    std::vector<Triangle> triangles;
 };
 
 /**
@@ -36,6 +50,5 @@ struct Mesh {
  *         command is encountered.
  */
 Mesh load_mesh_from_obj(const std::string &file_name);
-} // namespace NPR
 
 #endif

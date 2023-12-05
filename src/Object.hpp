@@ -10,12 +10,11 @@
 
 class Object : public Hittable {
   public:
-    Object(std::unique_ptr<NPR::Mesh> mesh) : mesh_(std::move(mesh)){};
-    void Translate(glm::vec3 delta);
+    Object(std::unique_ptr<Mesh> mesh) : mesh_(std::move(mesh)){};
+    bool Intersects(const Ray &ray, float t_min, HitRecord &record) override;
 
   private:
-    glm::vec3 position_;
-    std::unique_ptr<NPR::Mesh> mesh_;
+    std::unique_ptr<Mesh> mesh_;
 };
 
 #endif
