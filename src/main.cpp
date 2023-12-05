@@ -1,5 +1,7 @@
-#include "util/Mesh.hpp"
-#include "util/png.hpp"
+#include "Camera.hpp"
+#include "Mesh.hpp"
+#include "Scene.hpp"
+#include "Tracer.hpp"
 #include <glm/glm.hpp>
 #include <iostream>
 #include <vector>
@@ -8,17 +10,15 @@ int main() {
     int width = 256;
     int height = 256;
     std::vector<unsigned char> image(width * height * 4);
-    for (int i = 0; i < width * height; i++) {
-        image[4 * i] = 128;
-        image[4 * i + 1] = 128;
-        image[4 * i + 2] = 0;
-        image[4 * i + 3] = 255;
-    }
-    // lodepng::encode("out/out.png", image, width, height);
-    save_png("out2.png", image, width, height);
+
+    Scene scene;
+    Tracer tracer(CameraSpec{glm::vec3{0.0f, 0.0f, 0.0f},
+                             glm::vec3{0.0f, 0.0f, -1.0f},
+                             glm::vec3{0.0f, 1.0f, 0.0f}, 90.0f},
+                  width, height, glm::vec3{0.0f, 0.0f, 0.0f}, 10);
+    tracer.Render(scene, "render.png");
+
     std::cout << "Hello, World!" << std::endl;
-    glm::vec3 v(1.0f, 2.0f, 3.0f);
-    std::cout << v.x << " " << v.y << " " << v.z << std::endl;
 
     NPR::Mesh m = NPR::load_mesh_from_obj("c3.obj");
     std::cout << "number of vertices: " << m.vertices->size() << std::endl;
