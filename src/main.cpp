@@ -14,21 +14,29 @@ int main() {
     Tracer tracer(CameraSpec{glm::vec3{0.0f, 0.0f, 10.0f},
                              glm::vec3{0.0f, 0.0f, -1.0f},
                              glm::vec3{0.0f, 1.0f, 0.0f}, 30.0f},
-                  256, 256, glm::vec3{0.0f, 0.1f, 0.1f}, 10);
+                  256, 256, glm::vec3{0.0f, 0.3f, 0.3f}, 10);
     auto sphere =
         std::unique_ptr<Sphere>(new Sphere(glm::vec3{0.0f, 0.0f, 0.0f}, 1.0f));
     sphere->Translate(glm::vec3{0.0f, 0.0f, 0.0f});
-    Material material;
-    material.diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
-    material.specular = glm::vec3(0.5f, 0.5f, 0.5f);
-    material.shininess = 10.0f;
-    sphere->SetMaterial(material);
+    auto plane =
+        std::unique_ptr<Plane>(new Plane(glm::vec3{0.0f, -1.0f, 0.0f}, 1.0f));
+    Material red;
+    red.diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
+    red.specular = glm::vec3(0.5f, 0.5f, 0.5f);
+    red.shininess = 10.0f;
+    Material silver;
+    silver.diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
+    silver.specular = glm::vec3(0.8f, 0.8f, 0.8f);
+    silver.shininess = 20.0f;
+    sphere->SetMaterial(red);
+    plane->SetMaterial(silver);
 
     auto light = std::unique_ptr<PointLight>(
         new PointLight(glm::vec3{0.0f, -5.0f, 8.0f},
                        glm::vec3(0.8f, 0.5f, 0.7f), glm::vec3(0.025)));
 
     scene.AddObject(std::move(sphere));
+    scene.AddObject(std::move(plane));
     scene.AddLight(std::move(light));
     tracer.Render(scene, "render.png");
 

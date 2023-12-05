@@ -42,5 +42,12 @@ bool Triangle::Intersects(const Ray &ray, float t_min, HitRecord &record) {
 }
 
 bool Plane::Intersects(const Ray &ray, float t_min, HitRecord &record) {
-    throw "Plane intersection not implemented";
+    glm::vec3 oc = ray.origin - translation_;
+    float t = -(d_ + glm::dot(oc, normal_)) / glm::dot(ray.direction, normal_);
+    if (t < t_min || t > record.time) {
+        return false;
+    }
+    record.time = t;
+    record.normal = normal_;
+    return true;
 }
