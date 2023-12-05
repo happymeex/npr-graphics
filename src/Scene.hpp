@@ -11,8 +11,6 @@ class Scene {
   public:
     Scene();
     void AddObject(std::unique_ptr<Hittable> obj);
-
-  private:
-    std::vector<std::unique_ptr<Hittable>> children_;
+    std::vector<std::unique_ptr<Hittable>> children;
 };
 #endif

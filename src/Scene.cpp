@@ -3,5 +3,5 @@
 Scene::Scene() {}
 
 void Scene::AddObject(std::unique_ptr<Hittable> obj) {
-    children_.push_back(std::move(obj));
+    children.push_back(std::move(obj));
 }

@@ -2,6 +2,7 @@
 #define TRACER
 
 #include "Camera.hpp"
+#include "HitRecord.hpp"
 #include "Scene.hpp"
 #include <glm/glm.hpp>
 #include <string>
@@ -20,6 +21,9 @@ class Tracer {
     int height_;
     glm::vec3 background_color_;
     int max_bounces_;
+    const Scene *scene_;
+
+    glm::vec3 TraceRay(const Ray &ray, int bounces, HitRecord &hit_record);
 };
 
 #endif

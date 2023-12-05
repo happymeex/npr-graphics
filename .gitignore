@@ -6,3 +6,5 @@ out/*
 .vscode
 obj/*
 !obj/.gitkeep
+bin/*
+!bin/.gitkeep

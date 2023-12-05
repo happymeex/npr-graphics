@@ -9,11 +9,11 @@
 class Sphere : public Hittable {
   public:
     Sphere(glm::vec3 position, float radius)
-        : position_(position), radius_(radius){};
+        : center_(position), radius_(radius){};
     bool Intersects(const Ray &ray, float t_min, HitRecord &record) override;
 
   private:
-    glm::vec3 position_;
+    glm::vec3 center_;
     float radius_;
 };
 
