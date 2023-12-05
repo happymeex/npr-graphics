@@ -121,7 +121,6 @@ Mesh load_mesh_from_obj(const std::string &file_name) {
 
     if (mesh.normals->empty()) {
         // normals not provided, compute them based on vertices and faces
-        std::cout << "Computing normals..." << std::endl;
         mesh.UpdateNormals();
     }
     mesh.UpdateTriangles();

@@ -9,7 +9,7 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name) {
         for (int x = 0; x < width_; x++) {
             float mapped_x = 2.0f * (float)x / (width_ - 1) - 1.0f;
             float mapped_y = 2.0f * (float)y / (height_ - 1) - 1.0f;
-            Ray ray = camera_.GetRay(mapped_x, mapped_y);
+            Ray ray = camera_.GetRay(mapped_x, -mapped_y);
             HitRecord hit_record;
             glm::vec4 color = glm::vec4(TraceRay(ray, 0, hit_record), 1.0f);
 
