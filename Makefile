@@ -4,7 +4,28 @@ CC = g++
 # compiler flags
 FLAGS = -g -Wall -Werror -std=c++17 -Wno-unused-variable -Iexternal
 
-all: main
+SRCDIR = src/
+OBJDIR = obj/
+BINDIR = bin/
+EXTDIR = external/
+SRCFILES = $(shell find $(SRCDIR) -name "*.cpp" -type f)
+OBJFILES = $(patsubst $(SRCDIR)%.cpp,$(OBJDIR)%.o,$(SRCFILES))
+EXTFILES = $(shell find $(EXTDIR) -maxdepth 1 -name "*.cpp" -type f)
+EXTOBJS = $(patsubst $(EXTDIR)%.cpp,$(OBJDIR)%.o,$(EXTFILES))
 
-main: src/main.cpp external/lodepng.cpp src/Mesh.cpp src/util.cpp src/Scene.cpp src/Tracer.cpp src/Object.cpp src/Image.cpp
-	$(CC) $(FLAGS) -o build/main $^
+EXECUTABLE = $(BINDIR)main
+
+all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(OBJFILES) $(EXTOBJS)
+	$(CC) $(FLAGS) -o $@ $^
+
+obj/%.o: $(SRCDIR)%.cpp
+	$(CC) $(FLAGS) -c $< -o $@
+
+obj/%.o: $(EXTDIR)%.cpp
+	$(CC) $(FLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(OBJDIR)
+	mkdir $(OBJDIR)

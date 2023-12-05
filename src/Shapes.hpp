@@ -19,13 +19,12 @@ class Sphere : public Hittable {
 
 class Triangle : public Hittable {
   public:
-    Triangle::Triangle(const glm::vec3 &p0, const glm::vec3 &p1,
-                       const glm::vec3 &p2, const glm::vec3 &n0,
-                       const glm::vec3 &n1, const glm::vec3 &n2)
+    Triangle(const glm::vec3 &p0, const glm::vec3 &p1, const glm::vec3 &p2,
+             const glm::vec3 &n0, const glm::vec3 &n1, const glm::vec3 &n2)
         : positions_({p0, p1, p2}), normals_({n0, n1, n2}) {}
 
-    Triangle::Triangle(const std::vector<glm::vec3> &positions,
-                       const std::vector<glm::vec3> &normals)
+    Triangle(const std::vector<glm::vec3> &positions,
+             const std::vector<glm::vec3> &normals)
         : positions_(positions), normals_(normals) {}
     bool Intersects(const Ray &ray, float t_min, HitRecord &record) override;
 
