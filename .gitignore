@@ -1,4 +1,5 @@
-external
+external/*
+!external/.gitkeep
 build/*
 !build/.gitkeep
 out/*

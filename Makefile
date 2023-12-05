@@ -29,3 +29,4 @@ obj/%.o: $(EXTDIR)%.cpp
 clean:
 	rm -rf $(OBJDIR)
 	mkdir $(OBJDIR)
+	touch $(OBJDIR).gitkeep

@@ -32,11 +32,9 @@ int main() {
     scene.AddLight(std::move(light));
     tracer.Render(scene, "render.png");
 
-    std::cout << "Hello, World!" << std::endl;
-
-    NPR::Mesh m = NPR::load_mesh_from_obj("c3.obj");
-    std::cout << "number of vertices: " << m.vertices->size() << std::endl;
-    std::cout << "number of faces: " << m.indices->size() / 3 << std::endl;
+    // NPR::Mesh m = NPR::load_mesh_from_obj("c3.obj");
+    // std::cout << "number of vertices: " << m.vertices->size() << std::endl;
+    // std::cout << "number of faces: " << m.indices->size() / 3 << std::endl;
 
     return 0;
 }
