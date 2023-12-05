@@ -2,7 +2,7 @@
 CC = g++
 
 # compiler flags
-FLAGS = -g -Wall -Werror -std=c++17 -Wno-unused-variable -Iexternal
+FLAGS = -g -Wall -Werror -std=c++17 -Wno-unused-variable  -Wno-unused-private-field -Wno-deprecated-declarations -Iexternal
 
 SRCDIR = src/
 OBJDIR = obj/
