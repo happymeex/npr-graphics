@@ -139,25 +139,33 @@ Image Tracer::RenderOnce(RenderStyle style)
     return image;
 }
 
-void Tracer::Render(const Scene &scene, const std::string &out_file_name)
+void Tracer::Render(const Scene &scene, const std::string &out_file_name, RenderStyle style)
 {
     scene_ = &scene;
-    // Get the beta image to generate the edges
-    const auto beta_image = RenderOnce(RenderStyle::Beta);
-    const auto beta_edges = GetEdges(beta_image);
 
-    // Render the cel image
-    const auto cel_image = RenderOnce(RenderStyle::Cel);
-
-    // Multiply to get edged image
-    const auto multiply_inverse = [](glm::vec3 a, glm::vec3 b)
+    if (style == RenderStyle::Cel)
     {
-        return a * (glm::vec3(1.0, 1.0, 1.0) - 0.5f * b);
-        // return a * b;
-    };
-    const auto edged_image = ApplyLayer(cel_image, beta_edges, multiply_inverse);
+        // Get the beta image to generate the edges
+        const auto beta_image = RenderOnce(RenderStyle::Beta);
+        const auto beta_edges = GetEdges(beta_image);
 
-    edged_image.SavePNG(out_file_name);
+        // Render the cel image
+        const auto cel_image = RenderOnce(RenderStyle::Cel);
+
+        // Multiply to get edged image
+        const auto multiply_inverse = [](glm::vec3 a, glm::vec3 b)
+        {
+            return a * (glm::vec3(1.0, 1.0, 1.0) - 0.5f * b);
+        };
+        const auto edged_image = ApplyLayer(cel_image, beta_edges, multiply_inverse);
+
+        edged_image.SavePNG(out_file_name);
+    }
+    else if (style == RenderStyle::Real)
+    {
+        const auto result = RenderOnce(RenderStyle::Real);
+        result.SavePNG(out_file_name);
+    }
 }
 
 glm::vec3 Tracer::TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, RenderStyle style)

@@ -8,35 +8,38 @@
 #include <glm/glm.hpp>
 #include <string>
 
-enum class RenderStyle {
+enum class RenderStyle
+{
   Beta,
   Cel,
   Real,
+  Watercolor,
 };
 
 const glm::mat3 GX(1, 2, 1, 0, 0, 0, -1, -2, -1);
 const glm::mat3 GY(1, 0, -1, 2, 0, -2, 1, 0, -1);
 const glm::mat3 GAUSS(1, 2, 1, 2, 4, 2, 1, 2, 1);
 
-class Tracer {
-  public:
-    Tracer(const CameraSpec &camera_spec, int width, int height,
-           const glm::vec3 &background_color, int max_bounces)
-        : camera_(camera_spec), width_(width), height_(height),
-          background_color_(background_color), max_bounces_(max_bounces){};
-    void Render(const Scene &scene, const std::string &out_file_name);
+class Tracer
+{
+public:
+  Tracer(const CameraSpec &camera_spec, int width, int height,
+         const glm::vec3 &background_color, int max_bounces)
+      : camera_(camera_spec), width_(width), height_(height),
+        background_color_(background_color), max_bounces_(max_bounces){};
+  void Render(const Scene &scene, const std::string &out_file_name, RenderStyle style = RenderStyle::Real);
 
-  private:
-    Image RenderOnce(RenderStyle style);
+private:
+  Image RenderOnce(RenderStyle style);
 
-    Camera camera_;
-    int width_;
-    int height_;
-    glm::vec3 background_color_;
-    int max_bounces_;
-    const Scene *scene_;
+  Camera camera_;
+  int width_;
+  int height_;
+  glm::vec3 background_color_;
+  int max_bounces_;
+  const Scene *scene_;
 
-    glm::vec3 TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, RenderStyle style);
+  glm::vec3 TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, RenderStyle style);
 };
 
 #endif

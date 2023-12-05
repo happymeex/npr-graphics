@@ -10,7 +10,8 @@
 #include <iostream>
 #include <vector>
 
-int main() {
+int main()
+{
     Scene scene;
     Tracer tracer(CameraSpec{glm::vec3{0.35f, 0.6f, 0.8f},
                              glm::vec3{-0.5f, -0.5f, -1.0f},
@@ -52,7 +53,8 @@ int main() {
     scene.AddObject(std::move(bunny_obj));
     // scene.AddLight(std::move(light));
     scene.AddLight(std::move(directional_light));
-    tracer.Render(scene, "render.png");
+    tracer.Render(scene, "render_real.png", RenderStyle::Real);
+    tracer.Render(scene, "render_cel.png", RenderStyle::Cel);
 
     return 0;
 }
