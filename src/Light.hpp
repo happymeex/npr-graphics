@@ -17,6 +17,7 @@ class Light {
   public:
     Light(LightType type) : type_(type) { color_ = glm::vec3(1.0f); }
     Light(LightType type, glm::vec3 color) : type_(type), color_(color) {}
+    virtual ~Light() = default;
     LightType GetType() const { return type_; }
     glm::vec3 GetColor() const { return color_; }
     virtual void GetIllumination(const glm::vec3 &hit_pos,
