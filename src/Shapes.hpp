@@ -2,7 +2,6 @@
 #define SHAPES
 
 #include "Hittable.hpp"
-#include "Object.hpp"
 #include "Ray.hpp"
 #include <vector>
 

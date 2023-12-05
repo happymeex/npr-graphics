@@ -1,4 +1,5 @@
 #include "Image.hpp"
+#include <iostream>
 #include <lodepng.h>
 
 void Image::SetPixel(int x, int y, glm::vec4 color)
@@ -11,7 +12,7 @@ void Image::SetPixel(int x, int y, glm::vec4 color)
 }
 void Image::SavePNG(const std::string &file_name) const
 {
-    printf("Saving image to %s\n", file_name.c_str());
+    std::cout << "Saving image to " << file_name << std::endl;
     std::vector<unsigned char> data(width_ * height_ * 4);
     for (int i = 0; i < width_ * height_; i++)
     {
@@ -24,6 +25,6 @@ void Image::SavePNG(const std::string &file_name) const
         lodepng::encode("out/" + file_name, data, width_, height_);
     if (error)
     {
-        printf("error %s: %s\n", file_name.c_str(), lodepng_error_text(error));
+        std::cout << "Error: " << lodepng_error_text(error) << std::endl;
     }
 }

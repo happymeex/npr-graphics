@@ -38,7 +38,23 @@ bool Sphere::Intersects(const Ray &ray, float t_min, HitRecord &hit_record) {
 }
 
 bool Triangle::Intersects(const Ray &ray, float t_min, HitRecord &record) {
-    throw "Triangle intersection not implemented";
+    glm::vec3 oc = ray.origin - translation_;
+    glm::mat3 coeffs(1.f);
+    coeffs[0] = positions_[0] - positions_[1];
+    coeffs[1] = positions_[0] - positions_[2];
+    coeffs[2] = ray.direction;
+    glm::vec3 beta_gamma_t = glm::inverse(coeffs) * (positions_[0] - oc);
+    float beta = beta_gamma_t[0];
+    float gamma = beta_gamma_t[1];
+    float t = beta_gamma_t[2];
+    if (beta < 0 || gamma < 0 || beta + gamma > 1 || t < t_min ||
+        t > record.time) {
+        return false;
+    }
+    record.time = t;
+    record.normal = (1 - beta - gamma) * normals_[0] + beta * normals_[1] +
+                    gamma * normals_[2];
+    return true;
 }
 
 bool Plane::Intersects(const Ray &ray, float t_min, HitRecord &record) {

@@ -8,7 +8,7 @@
 class Hittable {
   public:
     Hittable() { translation_ = glm::vec3(0.0f, 0.0f, 0.0f); }
-    virtual ~Hittable() {}
+    virtual ~Hittable() = default;
     /**
      * Returns true if the ray intersects with the object at a time greater than
      * t_min. Updates the hit record if the ray intersects with the object.
