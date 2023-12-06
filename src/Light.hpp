@@ -62,9 +62,11 @@ class PointLight : public Light {
 class DirectionalLight : public Light {
   public:
     DirectionalLight(glm::vec3 direction)
-        : Light(LightType::DIRECTIONAL_LIGHT), direction_(direction) {}
+        : Light(LightType::DIRECTIONAL_LIGHT),
+          direction_(glm::normalize(direction)) {}
     DirectionalLight(glm::vec3 direction, glm::vec3 color)
-        : Light(LightType::DIRECTIONAL_LIGHT, color), direction_(direction) {}
+        : Light(LightType::DIRECTIONAL_LIGHT, color),
+          direction_(glm::normalize(direction)) {}
 
     glm::vec3 GetDirection() const { return direction_; }
     void GetIllumination(const glm::vec3 &hit_pos, glm::vec3 &dir_to_light,

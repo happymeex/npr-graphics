@@ -54,6 +54,7 @@ bool Triangle::Intersects(const Ray &ray, float t_min, HitRecord &record) {
     record.time = t;
     record.normal = (1 - beta - gamma) * normals_[0] + beta * normals_[1] +
                     gamma * normals_[2];
+    record.normal = glm::normalize(record.normal);
     return true;
 }
 
