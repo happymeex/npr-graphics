@@ -16,10 +16,6 @@ enum class RenderStyle
   Watercolor,
 };
 
-const glm::mat3 GX(1, 2, 1, 0, 0, 0, -1, -2, -1);
-const glm::mat3 GY(1, 0, -1, 2, 0, -2, 1, 0, -1);
-const glm::mat3 GAUSS(1, 2, 1, 2, 4, 2, 1, 2, 1);
-
 class Tracer
 {
 public:
