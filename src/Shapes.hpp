@@ -26,6 +26,7 @@ class Triangle : public Hittable {
              const std::vector<glm::vec3> &normals)
         : positions_(positions), normals_(normals) {}
     bool Intersects(const Ray &ray, float t_min, HitRecord &record) override;
+    std::vector<glm::vec3> GetPositions() const { return positions_; }
 
   private:
     std::vector<glm::vec3> positions_;
