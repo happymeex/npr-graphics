@@ -40,8 +40,8 @@ int main() {
     scene.AddObject(std::move(bunny_obj));
     scene.AddLight(std::move(directional_light));
     scene.AddLight(std::move(directional_light2));
-    scene.AddLight(std::move(ambient_light));
-    tracer.Render(scene, "render.png");
+    tracer.Render(scene, "render_real.png", RenderStyle::Real);
+    tracer.Render(scene, "render_cel.png", RenderStyle::Cel);
 
     return 0;
 }

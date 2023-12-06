@@ -10,6 +10,12 @@ class Image {
     Image(int width, int height) : width_(width), height_(height) {
         data_ = std::vector<glm::vec4>(width * height);
     }
+
+    int GetWidth() const { return width_; }
+
+    int GetHeight() const { return height_; }
+
+    const glm::vec4 &GetPixel(int x, int y) const;
     /**
      * Sets the color of a pixel at the specified coordinates in the image.
      *
@@ -21,13 +27,14 @@ class Image {
      * range.
      */
     void SetPixel(int x, int y, glm::vec4 color);
+
     /**
      * Saves the image as a PNG file in the `out/` directory.
      * Prints an error message if the file cannot be saved.
      *
      * @param file_name The name of the file to save the image to.
      */
-    void SavePNG(const std::string &file_name);
+    void SavePNG(const std::string &file_name) const;
 
   private:
     int width_;
