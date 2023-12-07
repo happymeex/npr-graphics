@@ -31,7 +31,7 @@ class Image {
      * @throws const char* An exception is thrown if the coordinates are out of
      * range.
      */
-    void SetPixel(int x, int y, glm::vec4 color);
+    void SetPixel(int x, int y, glm::vec4 color, bool clip = true);
 
     /**
      * Saves the image as a PNG file in the `out/` directory.
@@ -45,8 +45,7 @@ class Image {
         const Image &image2,
         const std::function<glm::vec3(glm::vec3, glm::vec3)> &function) const;
 
-    Image ApplyFilter(const glm::mat3 &filter,
-                      bool on_transparency = false) const;
+    Image ApplyFilter(const glm::mat3 &filter, bool on_transparency = false, bool clip = true) const;
 
     Image GetEdges() const;
 

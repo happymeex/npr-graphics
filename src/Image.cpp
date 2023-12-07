@@ -10,13 +10,18 @@ const glm::vec4 &Image::GetPixel(int x, int y) const {
             "Unable to get a pixel outside of image range.");
     }
 }
-void Image::SetPixel(int x, int y, glm::vec4 color) {
+void Image::SetPixel(int x, int y, glm::vec4 color, bool clip) {
     if (x < 0 || x >= width_ || y < 0 || y >= height_) {
         throw "Image SetPixel: index out of range";
     }
-    color.r = std::min(1.0f, color.r);
-    color.g = std::min(1.0f, color.g);
-    color.b = std::min(1.0f, color.b);
+    if (clip) {
+        color.r = std::max(std::min(1.0f, color.r), 0.0f);
+        color.g = std::max(std::min(1.0f, color.g), 0.0f);
+        color.b = std::max(std::min(1.0f, color.b), 0.0f);
+        // color.r = std::min(1.0f, color.r);
+        // color.g = std::min(1.0f, color.g);
+        // color.b = std::min(1.0f, color.b);
+    }
     data_[y * width_ + x] = color;
 }
 void Image::SavePNG(const std::string &file_name) const {
@@ -61,7 +66,7 @@ Image Image::ApplyLayer(
     return result;
 }
 
-Image Image::ApplyFilter(const glm::mat3 &filter, bool on_transparency) const {
+Image Image::ApplyFilter(const glm::mat3 &filter, bool on_transparency, bool clip) const {
 
     Image result{width_, height_};
 
@@ -106,7 +111,7 @@ Image Image::ApplyFilter(const glm::mat3 &filter, bool on_transparency) const {
                                  glm::vec3(GetPixel(true_x, true_y));
                     }
                 }
-                result.SetPixel(x, y, glm::vec4(normalizer * pixel, alpha));
+                result.SetPixel(x, y, glm::vec4(normalizer * pixel, alpha), clip);
             }
         }
     }
@@ -119,5 +124,5 @@ Image Image::GetEdges() const {
         return glm::vec3{val, val, val};
     };
 
-    return ApplyFilter(GX).ApplyLayer(ApplyFilter(GY), magnitude);
+    return ApplyFilter(GX, false, false).ApplyLayer(ApplyFilter(GY, false, false), magnitude);
 }

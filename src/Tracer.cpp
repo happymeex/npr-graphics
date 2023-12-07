@@ -11,7 +11,7 @@ Image Tracer::RenderOnce(RenderStyle style) {
             Ray ray = camera_.GetRay(mapped_x, -mapped_y);
             HitRecord hit_record = HitRecord();
             glm::vec4 color =
-                glm::vec4(TraceRay(ray, 0, hit_record, style), 1.0f);
+                glm::vec4(TraceRay(ray, 0, hit_record, style).color, 1.0f);
 
             image.SetPixel(x, y, color);
         }
@@ -20,17 +20,47 @@ Image Tracer::RenderOnce(RenderStyle style) {
     return image;
 }
 
+ImageInfo Tracer::RenderInfo(RenderStyle style) {
+    Image color_image{width_, height_};
+    Image beta_image{width_, height_};
+    Image normal_image{width_, height_};
+    Image depth_image{width_, height_};
+    for (int y = 0; y < height_; y++) {
+        for (int x = 0; x < width_; x++) {
+            float mapped_x = 2.0f * (float)x / (width_ - 1) - 1.0f;
+            float mapped_y = 2.0f * (float)y / (height_ - 1) - 1.0f;
+            Ray ray = camera_.GetRay(mapped_x, -mapped_y);
+            HitRecord hit_record = HitRecord();
+
+            auto pixel_info = TraceRay(ray, 0, hit_record, style);
+
+            color_image.SetPixel(x, y, glm::vec4(pixel_info.color, 1.0f));
+            beta_image.SetPixel(x, y, glm::vec4(pixel_info.diffuse_color, 1.0f));
+            normal_image.SetPixel(x, y, glm::vec4(pixel_info.normal, 1.0f), false);
+            depth_image.SetPixel(x, y, glm::vec4(pixel_info.depth, pixel_info.depth, pixel_info.depth, 1.0f), false);
+        }
+    }
+    return {
+        .color = color_image,
+        .beta = beta_image,
+        .normal = normal_image,
+        .depth = depth_image
+    };
+}
+
 void Tracer::Render(const Scene &scene, const std::string &out_file_name,
                     RenderStyle style) {
     scene_ = &scene;
 
     if (style == RenderStyle::Cel) {
         // Get the beta image to generate the edges
-        const auto beta_image = RenderOnce(RenderStyle::Beta);
+        const auto image_info = RenderInfo(RenderStyle::Cel);
+
+        const auto beta_image = image_info.beta;
         const auto beta_edges = beta_image.GetEdges();
 
         // Render the cel image
-        const auto cel_image = RenderOnce(RenderStyle::Cel);
+        const auto cel_image = image_info.color;
 
         // Multiply to get edged image
         const auto multiply_inverse = [](glm::vec3 a, glm::vec3 b) {
@@ -46,8 +76,9 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name,
     }
 }
 
-glm::vec3 Tracer::TraceRay(const Ray &ray, int bounces, HitRecord &hit_record,
-                           RenderStyle style) {
+PixelInfo Tracer::TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, RenderStyle style) {
+    PixelInfo result;
+
     glm::vec3 diffuse_color(0.0f, 0.0f, 0.0f);
     glm::vec3 specular_color(0.0f, 0.0f, 0.0f);
     float shininess = 0.0f;
@@ -63,11 +94,20 @@ glm::vec3 Tracer::TraceRay(const Ray &ray, int bounces, HitRecord &hit_record,
         }
     }
     if (!any_hit) {
-        return background_color_;
+        result.color = background_color_;
+        result.diffuse_color = background_color_;
+        result.normal = glm::vec3(0.0f, 0.0f, 0.0f);
+        result.depth = 0.0f;
+        return result;
     }
 
+    result.diffuse_color = diffuse_color;
+    result.normal = hit_record.normal;
+    result.depth = hit_record.time;
+
     if (style == RenderStyle::Beta) {
-        return diffuse_color;
+        result.color = diffuse_color;
+        return result;
     }
 
     glm::vec3 color(0.f);
@@ -111,5 +151,6 @@ glm::vec3 Tracer::TraceRay(const Ray &ray, int bounces, HitRecord &hit_record,
         color += specular_scalar * light_intensity * specular_color;
     }
 
-    return color;
+    result.color = color;
+    return result;
 }

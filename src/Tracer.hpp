@@ -16,6 +16,20 @@ enum class RenderStyle
   Watercolor,
 };
 
+struct PixelInfo {
+  glm::vec3 color;
+  glm::vec3 diffuse_color;
+  glm::vec3 normal;
+  float depth;
+};
+
+struct ImageInfo {
+  Image color;
+  Image beta;
+  Image normal;
+  Image depth;
+};
+
 class Tracer
 {
 public:
@@ -27,6 +41,7 @@ public:
 
 private:
   Image RenderOnce(RenderStyle style);
+  ImageInfo RenderInfo(RenderStyle style);
 
   Camera camera_;
   int width_;
@@ -35,7 +50,7 @@ private:
   int max_bounces_;
   const Scene *scene_;
 
-  glm::vec3 TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, RenderStyle style);
+  PixelInfo TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, RenderStyle style);
 };
 
 #endif
