@@ -49,22 +49,11 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name,
 
     if (style == RenderStyle::Cel) {
         // Get the beta image to generate the edges
-        const auto rendered_image = RenderInfo(RenderStyle::Cel);
+        auto rendered_image = RenderInfo(RenderStyle::Cel);
 
-        const auto beta_image = rendered_image.GetDiffuse();
-        const auto beta_edges = beta_image.GetEdges();
+        rendered_image.DrawEdges(0.5f);
 
-        // Render the cel image
-        const auto cel_image = rendered_image.GetColor();
-
-        // Multiply to get edged image
-        const auto multiply_inverse = [](glm::vec3 a, glm::vec3 b) {
-            return a * (glm::vec3(1.0, 1.0, 1.0) - 0.5f * b);
-        };
-        const auto edged_image =
-            cel_image.ApplyLayer(beta_edges, multiply_inverse);
-
-        edged_image.SavePNG(out_file_name);
+        rendered_image.GetFinal().SavePNG(out_file_name);
     } else if (style == RenderStyle::Real) {
         const auto result = RenderOnce(RenderStyle::Real);
         result.SavePNG(out_file_name);
