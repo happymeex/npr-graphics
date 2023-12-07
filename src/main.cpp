@@ -43,6 +43,7 @@ int main() {
     scene.AddLight(std::move(ambient_light));
     tracer.Render(scene, "render_real.png", RenderStyle::Real);
     tracer.Render(scene, "render_cel.png", RenderStyle::Cel);
+    tracer.Render(scene, "render_watercolor.png", RenderStyle::Watercolor);
 
     return 0;
 }

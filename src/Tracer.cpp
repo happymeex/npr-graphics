@@ -47,16 +47,34 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name,
                     RenderStyle style) {
     scene_ = &scene;
 
-    if (style == RenderStyle::Cel) {
-        // Get the beta image to generate the edges
-        auto rendered_image = RenderInfo(RenderStyle::Cel);
-
-        rendered_image.DrawEdges(0.5f);
-
-        rendered_image.GetFinal().SavePNG(out_file_name);
-    } else if (style == RenderStyle::Real) {
+    if (style == RenderStyle::Real) {
         const auto result = RenderOnce(RenderStyle::Real);
         result.SavePNG(out_file_name);
+    } else if (style == RenderStyle::Cel) {
+        auto rendered_image = RenderInfo(RenderStyle::Cel);
+        rendered_image.DrawEdges(0.5f);
+        rendered_image.GetFinal().SavePNG(out_file_name);
+    } else if (style == RenderStyle::Watercolor) {
+        // Start with the rendered Cel image (can change to Real if appropriate)
+        auto rendered_image = RenderInfo(RenderStyle::Cel);
+
+        // TODO: Implement pigment-based effects
+
+        // TODO: Implement other edge-based effects
+        rendered_image.DrawEdges(0.5f);
+
+        // TODO: Implement substrate-based effects
+
+        // TODO: Add a better control mask
+        Image mask{width_, height_};
+        // for (int y = 0; y < height_; y++) {
+        //     for (int x = 0; x < width_; x++) {
+        //         mask.SetPixel(x, y, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+        //     }
+        // }
+        rendered_image.Bleed(mask);
+
+        rendered_image.GetFinal().SavePNG(out_file_name);
     }
 }
 

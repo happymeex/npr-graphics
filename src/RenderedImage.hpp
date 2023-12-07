@@ -18,9 +18,12 @@ struct PixelInfo {
 class RenderedImage
 {
 public:
-  RenderedImage(const Image& color, const Image& diffuse, const Image& normal, const Image& depth, const Image& final) : color_(color), diffuse_(diffuse), normal_(normal), depth_(depth), final_(final) {};
+  RenderedImage(const Image& color, const Image& diffuse, const Image& normal, const Image& depth, const Image& final) : color_(color), diffuse_(diffuse), normal_(normal), depth_(depth), final_(final) {
+    width_ = final.GetWidth();
+    height_ = final.GetHeight();
+  };
 
-  void Bleed(std::vector<float> kernel_weights);
+  void Bleed(Image mask, int kernel_size = 10, float depth_threshold = 0.01f);
   
   void DrawEdges(float edge_strength = 1.0f);
 
@@ -50,6 +53,9 @@ private:
   const Image normal_;
   const Image depth_;
   Image final_;
+
+  int width_;
+  int height_;
 };
 
 #endif
