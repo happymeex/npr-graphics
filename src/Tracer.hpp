@@ -5,6 +5,7 @@
 #include "HitRecord.hpp"
 #include "Scene.hpp"
 #include "Image.hpp"
+#include "RenderedImage.hpp"
 #include <glm/glm.hpp>
 #include <string>
 
@@ -14,20 +15,6 @@ enum class RenderStyle
   Cel,
   Real,
   Watercolor,
-};
-
-struct PixelInfo {
-  glm::vec3 color;
-  glm::vec3 diffuse_color;
-  glm::vec3 normal;
-  float depth;
-};
-
-struct ImageInfo {
-  Image color;
-  Image beta;
-  Image normal;
-  Image depth;
 };
 
 class Tracer
@@ -41,7 +28,7 @@ public:
 
 private:
   Image RenderOnce(RenderStyle style);
-  ImageInfo RenderInfo(RenderStyle style);
+  RenderedImage RenderInfo(RenderStyle style);
 
   Camera camera_;
   int width_;

@@ -18,9 +18,6 @@ void Image::SetPixel(int x, int y, glm::vec4 color, bool clip) {
         color.r = std::max(std::min(1.0f, color.r), 0.0f);
         color.g = std::max(std::min(1.0f, color.g), 0.0f);
         color.b = std::max(std::min(1.0f, color.b), 0.0f);
-        // color.r = std::min(1.0f, color.r);
-        // color.g = std::min(1.0f, color.g);
-        // color.b = std::min(1.0f, color.b);
     }
     data_[y * width_ + x] = color;
 }

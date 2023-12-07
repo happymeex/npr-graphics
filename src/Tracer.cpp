@@ -20,7 +20,7 @@ Image Tracer::RenderOnce(RenderStyle style) {
     return image;
 }
 
-ImageInfo Tracer::RenderInfo(RenderStyle style) {
+RenderedImage Tracer::RenderInfo(RenderStyle style) {
     Image color_image{width_, height_};
     Image beta_image{width_, height_};
     Image normal_image{width_, height_};
@@ -40,12 +40,7 @@ ImageInfo Tracer::RenderInfo(RenderStyle style) {
             depth_image.SetPixel(x, y, glm::vec4(pixel_info.depth, pixel_info.depth, pixel_info.depth, 1.0f), false);
         }
     }
-    return {
-        .color = color_image,
-        .beta = beta_image,
-        .normal = normal_image,
-        .depth = depth_image
-    };
+    return {color_image, beta_image, normal_image, depth_image, color_image};
 }
 
 void Tracer::Render(const Scene &scene, const std::string &out_file_name,
@@ -54,13 +49,13 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name,
 
     if (style == RenderStyle::Cel) {
         // Get the beta image to generate the edges
-        const auto image_info = RenderInfo(RenderStyle::Cel);
+        const auto rendered_image = RenderInfo(RenderStyle::Cel);
 
-        const auto beta_image = image_info.beta;
+        const auto beta_image = rendered_image.GetDiffuse();
         const auto beta_edges = beta_image.GetEdges();
 
         // Render the cel image
-        const auto cel_image = image_info.color;
+        const auto cel_image = rendered_image.GetColor();
 
         // Multiply to get edged image
         const auto multiply_inverse = [](glm::vec3 a, glm::vec3 b) {
