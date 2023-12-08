@@ -39,6 +39,18 @@ void Image::SavePNG(const std::string &file_name) const {
 
 // Image processing functions
 
+/**
+ * Applies a layer to the image using a given blending function.
+ *
+ * @param image2 The image to blend with.
+ * @param function The blending function that takes two RGB colors and returns a
+ * blended color.
+ *
+ * @return The resulting image after applying the layer.
+ *
+ * @throws std::invalid_argument if the size of image2 is different from the
+ * current image.
+ */
 Image Image::ApplyLayer(
     const Image &image2,
     const std::function<glm::vec3(glm::vec3, glm::vec3)> &function) const {
@@ -63,7 +75,8 @@ Image Image::ApplyLayer(
     return result;
 }
 
-Image Image::ApplyFilter(const glm::mat3 &filter, bool on_transparency, bool clip) const {
+Image Image::ApplyFilter(const glm::mat3 &filter, bool on_transparency,
+                         bool clip) const {
 
     Image result{width_, height_};
 
@@ -108,7 +121,8 @@ Image Image::ApplyFilter(const glm::mat3 &filter, bool on_transparency, bool cli
                                  glm::vec3(GetPixel(true_x, true_y));
                     }
                 }
-                result.SetPixel(x, y, glm::vec4(normalizer * pixel, alpha), clip);
+                result.SetPixel(x, y, glm::vec4(normalizer * pixel, alpha),
+                                clip);
             }
         }
     }
@@ -121,5 +135,6 @@ Image Image::GetEdges() const {
         return glm::vec3{val, val, val};
     };
 
-    return ApplyFilter(GX, false, false).ApplyLayer(ApplyFilter(GY, false, false), magnitude);
+    return ApplyFilter(GX, false, false)
+        .ApplyLayer(ApplyFilter(GY, false, false), magnitude);
 }

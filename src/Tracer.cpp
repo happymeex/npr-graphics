@@ -10,8 +10,8 @@ Image Tracer::RenderOnce(RenderStyle style) {
             float mapped_y = 2.0f * (float)y / (height_ - 1) - 1.0f;
             Ray ray = camera_.GetRay(mapped_x, -mapped_y);
             HitRecord hit_record = HitRecord();
-            glm::vec4 color =
-                glm::vec4(TraceRay(ray, 0, hit_record, style).color, 1.0f);
+            glm::vec4 color = glm::vec4(
+                TraceRay(x, y, ray, 0, hit_record, style).color, 1.0f);
 
             image.SetPixel(x, y, color);
         }
@@ -25,6 +25,7 @@ RenderedImage Tracer::RenderInfo(RenderStyle style) {
     Image beta_image{width_, height_};
     Image normal_image{width_, height_};
     Image depth_image{width_, height_};
+    Image density_image{width_, height_};
     for (int y = 0; y < height_; y++) {
         for (int x = 0; x < width_; x++) {
             float mapped_x = 2.0f * (float)x / (width_ - 1) - 1.0f;
@@ -32,15 +33,24 @@ RenderedImage Tracer::RenderInfo(RenderStyle style) {
             Ray ray = camera_.GetRay(mapped_x, -mapped_y);
             HitRecord hit_record = HitRecord();
 
-            auto pixel_info = TraceRay(ray, 0, hit_record, style);
+            auto pixel_info = TraceRay(x, y, ray, 0, hit_record, style);
 
             color_image.SetPixel(x, y, glm::vec4(pixel_info.color, 1.0f));
-            beta_image.SetPixel(x, y, glm::vec4(pixel_info.diffuse_color, 1.0f));
-            normal_image.SetPixel(x, y, glm::vec4(pixel_info.normal, 1.0f), false);
-            depth_image.SetPixel(x, y, glm::vec4(pixel_info.depth, pixel_info.depth, pixel_info.depth, 1.0f), false);
+            beta_image.SetPixel(x, y,
+                                glm::vec4(pixel_info.diffuse_color, 1.0f));
+            normal_image.SetPixel(x, y, glm::vec4(pixel_info.normal, 1.0f),
+                                  false);
+            depth_image.SetPixel(x, y,
+                                 glm::vec4(pixel_info.depth, pixel_info.depth,
+                                           pixel_info.depth, 1.0f),
+                                 false);
+            density_image.SetPixel(
+                x, y, glm::vec4(glm::vec3(pixel_info.pigment_density), 1.0f),
+                false);
         }
     }
-    return {color_image, beta_image, normal_image, depth_image, color_image};
+    return {color_image, beta_image,    normal_image,
+            depth_image, density_image, color_image};
 }
 
 void Tracer::Render(const Scene &scene, const std::string &out_file_name,
@@ -56,9 +66,10 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name,
         rendered_image.GetFinal().SavePNG(out_file_name);
     } else if (style == RenderStyle::Watercolor) {
         // Start with the rendered Cel image (can change to Real if appropriate)
-        auto rendered_image = RenderInfo(RenderStyle::Cel);
+        auto rendered_image = RenderInfo(RenderStyle::Real);
 
         // TODO: Implement pigment-based effects
+        rendered_image.ApplyDensity();
 
         // TODO: Implement other edge-based effects
         rendered_image.DrawEdges(0.5f);
@@ -78,13 +89,16 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name,
     }
 }
 
-PixelInfo Tracer::TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, RenderStyle style) {
+PixelInfo Tracer::TraceRay(int x, int y, const Ray &ray, int bounces,
+                           HitRecord &hit_record, RenderStyle style) {
     PixelInfo result;
+    result.pigment_density = 0.0f;
 
     glm::vec3 diffuse_color(0.0f, 0.0f, 0.0f);
     glm::vec3 specular_color(0.0f, 0.0f, 0.0f);
     float shininess = 0.0f;
     bool any_hit = false;
+    glm::vec3 hit_pos(0.0f, 0.0f, 0.0f);
     for (auto &obj : scene_->children) {
         bool hit = obj->Intersects(ray, 0.0f, hit_record);
         any_hit |= hit;
@@ -93,6 +107,8 @@ PixelInfo Tracer::TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, R
             diffuse_color = material.diffuse;
             specular_color = material.specular;
             shininess = material.shininess;
+            hit_pos = ray.origin + ray.direction * hit_record.time;
+            result.pigment_density = obj->GetDensity(hit_pos);
         }
     }
     if (!any_hit) {
@@ -100,6 +116,7 @@ PixelInfo Tracer::TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, R
         result.diffuse_color = background_color_;
         result.normal = glm::vec3(0.0f, 0.0f, 0.0f);
         result.depth = 0.0f;
+        result.pigment_density = scene_->GetDensity(0.01 * x, 0.01 * y);
         return result;
     }
 
@@ -113,7 +130,6 @@ PixelInfo Tracer::TraceRay(const Ray &ray, int bounces, HitRecord &hit_record, R
     }
 
     glm::vec3 color(0.f);
-    glm::vec3 hit_pos = ray.origin + ray.direction * hit_record.time;
     for (const auto &light : scene_->lights) {
         glm::vec3 dir_to_light;
         glm::vec3 light_intensity;

@@ -6,7 +6,7 @@ std::vector<float> CalculateKernelWeights(int n, float sigma = 1.0f) {
     float total = 0.0f;
     std::vector<float> result;
     for (int i = -n; i <= n; ++i) {
-        float value = std::exp(-n*n/(2*sigma*sigma));
+        float value = std::exp(-n * n / (2 * sigma * sigma));
         result.push_back(value);
         total += value;
     }
@@ -24,14 +24,16 @@ void RenderedImage::Bleed(Image mask, int kernel_size, float depth_threshold) {
     for (int y = 0; y < height_; y++) {
         for (int x = 0; x < width_; x++) {
             for (int i = -kernel_size; i <= kernel_size; ++i) {
-                auto x_shift = std::min(std::max(x+i, 0), width_-1);
+                auto x_shift = std::min(std::max(x + i, 0), width_ - 1);
                 // Check if source or destination pixels are bled
-                if (mask.GetPixel(x, y)[0] > 0 || (mask.GetPixel(x_shift, y)[0] > 0)) {
+                if (mask.GetPixel(x, y)[0] > 0 ||
+                    (mask.GetPixel(x_shift, y)[0] > 0)) {
                     // Initialize bleed and depth queries
                     auto bleed = false;
                     auto source_behind = false;
                     // Check if source pixel is behind
-                    if (depth_.GetPixel(x, y)[0] - depth_threshold > depth_.GetPixel(x_shift, y)[0]) {
+                    if (depth_.GetPixel(x, y)[0] - depth_threshold >
+                        depth_.GetPixel(x_shift, y)[0]) {
                         source_behind = true;
                     }
                     // Check bleeding cases
@@ -43,13 +45,22 @@ void RenderedImage::Bleed(Image mask, int kernel_size, float depth_threshold) {
                     // Bleed colors
                     if (bleed) {
                         // Add weighted destination color
-                        bled_image.SetPixel(x, y, bled_image.GetPixel(x, y) + final_.GetPixel(x_shift, y) * kernel_weights.at(i+10));
+                        bled_image.SetPixel(x, y,
+                                            bled_image.GetPixel(x, y) +
+                                                final_.GetPixel(x_shift, y) *
+                                                    kernel_weights.at(i + 10));
                     } else {
                         // Add weighted source color
-                        bled_image.SetPixel(x, y, bled_image.GetPixel(x, y) + final_.GetPixel(x, y) * kernel_weights.at(i+10));
+                        bled_image.SetPixel(x, y,
+                                            bled_image.GetPixel(x, y) +
+                                                final_.GetPixel(x, y) *
+                                                    kernel_weights.at(i + 10));
                     }
                 } else {
-                    bled_image.SetPixel(x, y, bled_image.GetPixel(x, y) + final_.GetPixel(x, y) * kernel_weights.at(i+10));
+                    bled_image.SetPixel(x, y,
+                                        bled_image.GetPixel(x, y) +
+                                            final_.GetPixel(x, y) *
+                                                kernel_weights.at(i + 10));
                 }
             }
             // TODO: control image mask logic
@@ -67,6 +78,18 @@ void RenderedImage::DrawEdges(float edge_strength) {
     const auto multiply_inverse = [edge_strength](glm::vec3 a, glm::vec3 b) {
         return a * (glm::vec3(1.0, 1.0, 1.0) - edge_strength * b);
     };
-    
+
     final_ = final_.ApplyLayer(beta_edges, multiply_inverse);
+}
+
+void RenderedImage::ApplyDensity() {
+    const auto apply_density = [this](glm::vec3 color,
+                                      glm::vec3 density) -> glm::vec3 {
+        glm::vec3 alpha = glm::vec3(1.f) + density;
+        glm::vec3 color_pow = glm::pow(color, alpha);
+        alpha = glm::clamp(alpha, 0.f, 1.f);
+        return alpha * color_pow +
+               (glm::vec3(1.f) - alpha) * WATERCOLOR_PAPER_COLOR;
+    };
+    final_ = final_.ApplyLayer(density_, apply_density);
 }

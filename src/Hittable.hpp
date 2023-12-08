@@ -4,10 +4,11 @@
 #include "HitRecord.hpp"
 #include "Material.hpp"
 #include "Ray.hpp"
+#include <PerlinNoise.hpp>
 
 class Hittable {
   public:
-    Hittable() { translation_ = glm::vec3(0.0f, 0.0f, 0.0f); }
+    Hittable();
     virtual ~Hittable() = default;
     /**
      * Returns true if the ray intersects with the object at a time greater than
@@ -23,10 +24,13 @@ class Hittable {
     void SetMaterial(Material &material) { material_ = material; }
     Material GetMaterial() { return material_; }
     void Translate(glm::vec3 translation) { translation_ += translation; }
+    virtual float GetDensity(glm::vec3 position) const;
 
   protected:
     Material material_;
     glm::vec3 translation_;
+
+    siv::PerlinNoise pigment_density_perlin_;
 };
 
 #endif
