@@ -5,8 +5,11 @@ that produces images in watercolor and cel-shaded styles.
 
 ## Setup
 
-Download files `lodepng.h` and `lodepng.cpp` from [here](https://github.com/lvandeve/lodepng/tree/d398e0f10d152a5d17fa30463474dc9f56523f9c) and put them in the `external/` directory.
-Then, download the `glm/` folder from the [GLM](https://github.com/g-truc/glm/tree/586a402397dd35d66d7a079049856d1e2cbab300) repository and put it in `external/` as well.
+Download the following and put them in the `external/` directory:
+
+-   Files `lodepng.h` and `lodepng.cpp` from [here](https://github.com/lvandeve/lodepng/tree/d398e0f10d152a5d17fa30463474dc9f56523f9c),
+-   The `glm/` folder from the [GLM](https://github.com/g-truc/glm/tree/586a402397dd35d66d7a079049856d1e2cbab300) repository,
+-   The file `PerlinNoise.hpp` from [here](https://github.com/Reputeless/PerlinNoise/tree/bdf39fe92b2a585cdef485bcec2bca8ab5614095).
 
 ## Usage
 
