@@ -141,7 +141,9 @@ PixelInfo Tracer::TraceRay(int x, int y, const Ray &ray, int bounces,
             continue;
         }
 
-        // TODO: Shadows
+        if (IsShadowed(hit_pos, dir_to_light, dist_to_light)) {
+            continue;
+        }
 
         float diffuse_scalar =
             glm::max(0.0f, glm::dot(hit_record.normal, dir_to_light));
@@ -171,4 +173,18 @@ PixelInfo Tracer::TraceRay(int x, int y, const Ray &ray, int bounces,
 
     result.color = color;
     return result;
+}
+
+bool Tracer::IsShadowed(const glm::vec3 &hit_pos, const glm::vec3 &dir_to_light,
+                        const float dist_to_light) const {
+    float eps = 0.001f;
+    HitRecord record;
+    record.time = dist_to_light;
+    Ray shadow_ray{hit_pos + eps * dir_to_light, dir_to_light};
+    for (auto &obj : scene_->children) {
+        if (obj->Intersects(shadow_ray, 0.0f, record)) {
+            return true;
+        }
+    }
+    return false;
 }

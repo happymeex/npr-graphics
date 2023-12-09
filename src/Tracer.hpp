@@ -38,6 +38,9 @@ class Tracer {
 
     PixelInfo TraceRay(int x, int y, const Ray &ray, int bounces,
                        HitRecord &hit_record, RenderStyle style);
+
+    bool IsShadowed(const glm::vec3 &hit_pos, const glm::vec3 &dir_to_light,
+                    const float dist_to_light) const;
 };
 
 #endif

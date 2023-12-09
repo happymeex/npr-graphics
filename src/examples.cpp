@@ -20,10 +20,17 @@ void ball() {
     orange.diffuse = glm::vec3(1.0f, 0.5f, 0.0f);
     orange.specular = glm::vec3(0.5f, 0.5f, 0.5f);
     orange.shininess = 10.0f;
+    Material white;
+    white.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    white.specular = glm::vec3(0.5f, 0.5f, 0.5f);
+    white.shininess = 10.0f;
 
     auto sphere =
         std::unique_ptr<Sphere>(new Sphere(glm::vec3{0.f, 0.f, 0.f}, 1.0f));
     sphere->SetMaterial(orange);
+    auto plane =
+        std::unique_ptr<Plane>(new Plane(glm::vec3{0.f, 1.f, 0.f}, 1.f));
+    plane->SetMaterial(white);
 
     auto point_light = std::unique_ptr<Light>(new PointLight(
         glm::vec3{2.f, 5.f, 8.f}, glm::vec3{8.f, 5.f, 7.f}, glm::vec3(0.025f)));
@@ -31,6 +38,7 @@ void ball() {
         std::unique_ptr<Light>(new AmbientLight(glm::vec3(0.5f)));
 
     scene.AddObject(std::move(sphere));
+    scene.AddObject(std::move(plane));
     // scene.AddLight(std::move(directional_light));
     scene.AddLight(std::move(point_light));
     scene.AddLight(std::move(ambient_light));
