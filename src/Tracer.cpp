@@ -8,10 +8,11 @@ Image Tracer::RenderOnce(RenderStyle style) {
         for (int x = 0; x < width_; x++) {
             float mapped_x = 2.0f * (float)x / (width_ - 1) - 1.0f;
             float mapped_y = 2.0f * (float)y / (height_ - 1) - 1.0f;
+            glm::vec2 img_pos = glm::vec2(mapped_x, -mapped_y);
             Ray ray = camera_.GetRay(mapped_x, -mapped_y);
             HitRecord hit_record = HitRecord();
             glm::vec4 color = glm::vec4(
-                TraceRay(x, y, ray, 0, hit_record, style).color, 1.0f);
+                TraceRay(img_pos, ray, 0, hit_record, style).color, 1.0f);
 
             image.SetPixel(x, y, color);
         }
@@ -30,10 +31,11 @@ RenderedImage Tracer::RenderInfo(RenderStyle style) {
         for (int x = 0; x < width_; x++) {
             float mapped_x = 2.0f * (float)x / (width_ - 1) - 1.0f;
             float mapped_y = 2.0f * (float)y / (height_ - 1) - 1.0f;
+            glm::vec2 img_pos = glm::vec2(mapped_x, -mapped_y);
             Ray ray = camera_.GetRay(mapped_x, -mapped_y);
             HitRecord hit_record = HitRecord();
 
-            auto pixel_info = TraceRay(x, y, ray, 0, hit_record, style);
+            auto pixel_info = TraceRay(img_pos, ray, 0, hit_record, style);
 
             color_image.SetPixel(x, y, glm::vec4(pixel_info.color, 1.0f));
             beta_image.SetPixel(x, y,
@@ -89,8 +91,9 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name,
     }
 }
 
-PixelInfo Tracer::TraceRay(int x, int y, const Ray &ray, int bounces,
-                           HitRecord &hit_record, RenderStyle style) {
+PixelInfo Tracer::TraceRay(const glm::vec2 &img_pos, const Ray &ray,
+                           int bounces, HitRecord &hit_record,
+                           RenderStyle style) {
     PixelInfo result;
     result.pigment_density = 0.0f;
 
@@ -108,7 +111,7 @@ PixelInfo Tracer::TraceRay(int x, int y, const Ray &ray, int bounces,
             specular_color = material.specular;
             shininess = material.shininess;
             hit_pos = ray.origin + ray.direction * hit_record.time;
-            result.pigment_density = obj->GetDensity(hit_pos);
+            result.pigment_density = obj->GetDensity(img_pos, hit_pos);
         }
     }
     if (!any_hit) {
@@ -116,7 +119,7 @@ PixelInfo Tracer::TraceRay(int x, int y, const Ray &ray, int bounces,
         result.diffuse_color = background_color_;
         result.normal = glm::vec3(0.0f, 0.0f, 0.0f);
         result.depth = 0.0f;
-        result.pigment_density = scene_->GetDensity(0.01 * x, 0.01 * y);
+        result.pigment_density = scene_->GetDensity(img_pos);
         return result;
     }
 
