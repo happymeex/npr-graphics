@@ -37,6 +37,8 @@ class Plane : public Hittable {
   public:
     Plane(const glm::vec3 &normal, float d) : normal_(normal), d_(d){};
     bool Intersects(const Ray &ray, float t_min, HitRecord &record) override;
+    float GetDensity(const glm::vec2 &img_pos,
+                     const glm::vec3 &position) const override;
 
   private:
     glm::vec3 normal_;

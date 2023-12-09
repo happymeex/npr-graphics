@@ -21,8 +21,8 @@ void ball() {
     orange.specular = glm::vec3(0.5f, 0.5f, 0.5f);
     orange.shininess = 10.0f;
     Material white;
-    white.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    white.specular = glm::vec3(0.5f, 0.5f, 0.5f);
+    white.diffuse = glm::vec3(.6f, .6f, .6f);
+    white.specular = glm::vec3(0.2f, 0.2f, 0.2f);
     white.shininess = 10.0f;
 
     auto sphere =
@@ -33,7 +33,7 @@ void ball() {
     plane->SetMaterial(white);
 
     auto point_light = std::unique_ptr<Light>(new PointLight(
-        glm::vec3{2.f, 5.f, 8.f}, glm::vec3{8.f, 5.f, 7.f}, glm::vec3(0.025f)));
+        glm::vec3{2.f, 4.f, 3.f}, glm::vec3{1.f, 1.f, 1.f}, glm::vec3(0.025f)));
     auto ambient_light =
         std::unique_ptr<Light>(new AmbientLight(glm::vec3(0.5f)));
 
