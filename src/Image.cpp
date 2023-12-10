@@ -12,7 +12,7 @@ const glm::vec4 &Image::GetPixel(int x, int y) const {
 }
 void Image::SetPixel(int x, int y, glm::vec4 color, bool clip) {
     if (x < 0 || x >= width_ || y < 0 || y >= height_) {
-        throw "Image SetPixel: index out of range";
+        throw std::runtime_error("Image SetPixel: index out of range");
     }
     if (clip) {
         color.r = std::max(std::min(1.0f, color.r), 0.0f);

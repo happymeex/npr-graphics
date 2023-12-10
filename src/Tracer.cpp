@@ -51,6 +51,7 @@ RenderedImage Tracer::RenderInfo(RenderStyle style) {
                 false);
         }
     }
+
     return {color_image, beta_image,    normal_image,
             depth_image, density_image, color_image};
 }
@@ -86,6 +87,8 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name,
         //     }
         // }
         rendered_image.Bleed(mask);
+
+        rendered_image.ApplyPaperTexture();
 
         rendered_image.GetFinal().SavePNG(out_file_name);
     }

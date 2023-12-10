@@ -4,6 +4,7 @@
 #include "Camera.hpp"
 #include "HitRecord.hpp"
 #include "Image.hpp"
+#include "Paper.hpp"
 #include "Scene.hpp"
 #include <glm/glm.hpp>
 #include <string>
@@ -19,12 +20,7 @@ struct PixelInfo {
 class RenderedImage {
   public:
     RenderedImage(const Image &color, const Image &diffuse, const Image &normal,
-                  const Image &depth, const Image &density, const Image &final)
-        : color_(color), diffuse_(diffuse), normal_(normal), depth_(depth),
-          density_(density), final_(final) {
-        width_ = final.GetWidth();
-        height_ = final.GetHeight();
-    };
+                  const Image &depth, const Image &density, const Image &final);
 
     /**
      * Bleeds the image based on the provided mask, kernel size, and depth
@@ -43,6 +39,8 @@ class RenderedImage {
 
     void ApplyDensity();
 
+    void ApplyPaperTexture();
+
     const Image GetColor() const { return color_; }
 
     const Image GetDiffuse() const { return diffuse_; }
@@ -56,18 +54,17 @@ class RenderedImage {
     const Image GetDensity() const { return density_; }
 
   private:
+    int width_;
+    int height_;
     const Image color_;
     const Image diffuse_;
     const Image normal_;
     const Image depth_;
     const Image density_;
+    Image paper_mask_;
     Image final_;
+    std::unique_ptr<Paper> paper_;
     glm::vec3 WATERCOLOR_PAPER_COLOR = glm::vec3(.95f, .95f, .90f);
-
-    int width_;
-    int height_;
-
-    glm::vec3 ApplyPigmentTurbulence(glm::vec3 color, glm::vec3 density);
 };
 
 #endif

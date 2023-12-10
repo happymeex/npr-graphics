@@ -1,6 +1,24 @@
 #include "RenderedImage.hpp"
 #include <glm/gtx/string_cast.hpp>
 #include <iostream>
+#include <memory>
+
+RenderedImage::RenderedImage(const Image &color, const Image &diffuse,
+                             const Image &normal, const Image &depth,
+                             const Image &density, const Image &final)
+    : width_(final.GetWidth()), height_(final.GetHeight()), color_(color),
+      diffuse_(diffuse), normal_(normal), depth_(depth), density_(density),
+      paper_mask_(final.GetWidth(), final.GetHeight()), final_(final) {
+    paper_ =
+        std::unique_ptr<Paper>(new Paper("paper_uvh.txt", width_, height_, 45));
+    for (int y = 0; y < height_; y++) {
+        for (int x = 0; x < width_; x++) {
+            glm::vec3 paper_illumination = paper_->GetPaperIllumination(x, y);
+            paper_mask_.SetPixel(x, y, glm::vec4(paper_illumination, 1.0f),
+                                 false);
+        }
+    }
+};
 
 std::vector<float> CalculateKernelWeights(int n, float sigma = 1.0f) {
     float total = 0.0f;
@@ -92,4 +110,12 @@ void RenderedImage::ApplyDensity() {
                (glm::vec3(1.f) - alpha) * WATERCOLOR_PAPER_COLOR;
     };
     final_ = final_.ApplyLayer(density_, apply_density);
+}
+
+void RenderedImage::ApplyPaperTexture() {
+    const auto apply_paper_texture =
+        [this](glm::vec3 color, glm::vec3 paper_illumination) -> glm::vec3 {
+        return color * paper_illumination;
+    };
+    final_ = final_.ApplyLayer(paper_mask_, apply_paper_texture);
 }
