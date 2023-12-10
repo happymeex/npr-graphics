@@ -2,7 +2,11 @@
 #include <iostream>
 #include <lodepng.h>
 
-const glm::vec4 &Image::GetPixel(int x, int y) const {
+const glm::vec4 &Image::GetPixel(int x, int y, bool strict) const {
+    if (!strict) {
+        x = std::max(std::min(x, width_-1), 0);
+        y = std::max(std::min(y, width_-1), 0);
+    }
     if (x < width_ && y < height_) {
         return data_[y * width_ + x];
     } else {
@@ -15,11 +19,11 @@ void Image::SetPixel(int x, int y, glm::vec4 color, bool clip) {
         throw "Image SetPixel: index out of range";
     }
     if (clip) {
-        color.r = std::max(std::min(1.0f, color.r), 0.0f);
-        color.g = std::max(std::min(1.0f, color.g), 0.0f);
-        color.b = std::max(std::min(1.0f, color.b), 0.0f);
+        data_[y * width_ + x] = glm::clamp(color, 0.0f, 1.0f);
+    } else {
+        data_[y * width_ + x] = color;
     }
-    data_[y * width_ + x] = color;
+    
 }
 void Image::SavePNG(const std::string &file_name) const {
     std::cout << "Saving image to " << file_name << std::endl;
@@ -75,15 +79,23 @@ Image Image::ApplyLayer(
     return result;
 }
 
-Image Image::ApplyFilter(const glm::mat3 &filter, bool on_transparency,
+Image Image::ApplyFilter(const std::vector<std::vector<float>> &filter, bool on_transparency,
                          bool clip) const {
+
+    int n = filter.size();
+    
+    if (n % 2 != 1) {
+        throw std::invalid_argument("Filter must be a square of odd size");
+    }
+
+    int m = (n - 1) / 2;
 
     Image result{width_, height_};
 
     float normalizer = 0.0f;
 
-    for (int x = 0; x < 3; ++x) {
-        for (int y = 0; y < 3; ++y) {
+    for (int x = 0; x < n; ++x) {
+        for (int y = 0; y < n; ++y) {
             normalizer += filter[x][y];
         }
     }
@@ -101,23 +113,23 @@ Image Image::ApplyFilter(const glm::mat3 &filter, bool on_transparency,
             // Filter applied to transparency as well
             if (on_transparency) {
                 glm::vec4 pixel{0, 0, 0, 0};
-                for (int i = -1; i <= 1; ++i) {
-                    for (int j = -1; j <= 1; ++j) {
+                for (int i = -m; i <= m; ++i) {
+                    for (int j = -m; j <= m; ++j) {
                         auto true_x = std::min(std::max(0, x + i), upper_bound);
                         auto true_y = std::min(std::max(0, y + j), lower_bound);
                         pixel +=
-                            filter[i + 1][j + 1] * GetPixel(true_x, true_y);
+                            filter[i + m][j + m] * GetPixel(true_x, true_y);
                     }
                 }
                 result.SetPixel(x, y, normalizer * pixel);
             } else {
                 glm::vec3 pixel{0, 0, 0};
                 auto alpha = GetPixel(x, y)[3];
-                for (int i = -1; i <= 1; ++i) {
-                    for (int j = -1; j <= 1; ++j) {
+                for (int i = -m; i <= m; ++i) {
+                    for (int j = -m; j <= m; ++j) {
                         auto true_x = std::min(std::max(0, x + i), upper_bound);
                         auto true_y = std::min(std::max(0, y + j), lower_bound);
-                        pixel += filter[i + 1][j + 1] *
+                        pixel += filter[i + m][j + m] *
                                  glm::vec3(GetPixel(true_x, true_y));
                     }
                 }
@@ -137,4 +149,18 @@ Image Image::GetEdges() const {
 
     return ApplyFilter(GX, false, false)
         .ApplyLayer(ApplyFilter(GY, false, false), magnitude);
+}
+
+Image Image::GaussianBlur(int m, float sigma) const {
+    auto weights_1d = CalculateKernelWeights(m, sigma);
+    std::vector<std::vector<float>> weights_2d;
+
+    for (int i = 0; i != weights_1d.size(); ++i) {
+        weights_2d.push_back({});
+        for (int j = 0; j != weights_1d.size(); ++j) {
+            weights_2d[i].push_back(weights_1d.at(i) * weights_1d.at(j));
+        }
+    }
+
+    return ApplyFilter(weights_2d);
 }

@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 
-const glm::mat3 GX(1, 2, 1, 0, 0, 0, -1, -2, -1);
-const glm::mat3 GY(1, 0, -1, 2, 0, -2, 1, 0, -1);
-const glm::mat3 GAUSS(1, 2, 1, 2, 4, 2, 1, 2, 1);
+const std::vector<std::vector<float>> GX{{1, 2, 1}, {0, 0, 0}, {-1, -2, -1}};
+const std::vector<std::vector<float>> GY{{1, 0, -1}, {2, 0, -2}, {1, 0, -1}};
+const std::vector<std::vector<float>> GAUSS{{1, 2, 1}, {2, 4, 2}, {1, 2, 1}};
 
 class Image {
   public:
@@ -20,7 +20,7 @@ class Image {
 
     int GetHeight() const { return height_; }
 
-    const glm::vec4 &GetPixel(int x, int y) const;
+    const glm::vec4 &GetPixel(int x, int y, bool strict = true) const;
     /**
      * Sets the color of a pixel at the specified coordinates in the image.
      *
@@ -45,9 +45,25 @@ class Image {
         const Image &image2,
         const std::function<glm::vec3(glm::vec3, glm::vec3)> &function) const;
 
-    Image ApplyFilter(const glm::mat3 &filter, bool on_transparency = false, bool clip = true) const;
+    Image ApplyFilter(const std::vector<std::vector<float>> &filter, bool on_transparency = false, bool clip = true) const;
 
     Image GetEdges() const;
+
+    Image GaussianBlur(int m, float sigma = 1.0f) const;
+
+    static std::vector<float> CalculateKernelWeights(int n, float sigma = 1.0f) {
+      float total = 0.0f;
+      std::vector<float> result;
+      for (int i = -n; i <= n; ++i) {
+          float value = std::exp(-n * n / (2 * sigma * sigma));
+          result.push_back(value);
+          total += value;
+      }
+      for (auto it = result.begin(); it != result.end(); ++it) {
+          *it = *it / total;
+      }
+      return result;
+  }
 
   private:
     int width_;

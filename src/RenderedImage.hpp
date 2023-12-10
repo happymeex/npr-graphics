@@ -26,6 +26,12 @@ class RenderedImage {
         height_ = final.GetHeight();
     };
 
+    void DrawEdges(float edge_strength = 1.0f);
+
+    void ApplyDensity();
+
+    void GapsAndOverlaps(int m, int p);
+
     /**
      * Bleeds the image based on the provided mask, kernel size, and depth
      * threshold.
@@ -38,10 +44,6 @@ class RenderedImage {
      * @throws None
      */
     void Bleed(Image mask, int kernel_size = 10, float depth_threshold = 0.01f);
-
-    void DrawEdges(float edge_strength = 1.0f);
-
-    void ApplyDensity();
 
     const Image GetColor() const { return color_; }
 
@@ -68,6 +70,11 @@ class RenderedImage {
     int height_;
 
     glm::vec3 ApplyPigmentTurbulence(glm::vec3 color, glm::vec3 density);
+
+    // Red Green Blue Depth
+    glm::vec4 GetRGBD(int x, int y, bool strict = true) const {
+      return glm::vec4(glm::vec3(final_.GetPixel(x, y, strict)), depth_.GetPixel(x, y, strict)[0]);
+    }
 };
 
 #endif

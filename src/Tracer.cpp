@@ -66,24 +66,25 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name,
         rendered_image.GetFinal().SavePNG(out_file_name);
     } else if (style == RenderStyle::Watercolor) {
         // Start with the rendered Cel image (can change to Real if appropriate)
-        auto rendered_image = RenderInfo(RenderStyle::Real);
+        auto rendered_image = RenderInfo(RenderStyle::Cel);
 
         // TODO: Implement pigment-based effects
-        rendered_image.ApplyDensity();
+        // rendered_image.ApplyDensity();
 
         // TODO: Implement other edge-based effects
-        rendered_image.DrawEdges(0.5f);
+        // rendered_image.DrawEdges(0.5f);
+        rendered_image.GapsAndOverlaps(5, -4);
 
         // TODO: Implement substrate-based effects
 
         // TODO: Add a better control mask
-        Image mask{width_, height_};
+        // Image mask{width_, height_};
         // for (int y = 0; y < height_; y++) {
         //     for (int x = 0; x < width_; x++) {
         //         mask.SetPixel(x, y, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
         //     }
         // }
-        rendered_image.Bleed(mask);
+        // rendered_image.Bleed(mask);
 
         rendered_image.GetFinal().SavePNG(out_file_name);
     }
@@ -115,7 +116,7 @@ PixelInfo Tracer::TraceRay(int x, int y, const Ray &ray, int bounces,
         result.color = background_color_;
         result.diffuse_color = background_color_;
         result.normal = glm::vec3(0.0f, 0.0f, 0.0f);
-        result.depth = 0.0f;
+        result.depth = std::numeric_limits<float>::max();
         result.pigment_density = scene_->GetDensity(0.01 * x, 0.01 * y);
         return result;
     }
