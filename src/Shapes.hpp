@@ -18,6 +18,7 @@ class Sphere : public Hittable {
 
 class Triangle : public Hittable {
   public:
+    Triangle(const glm::vec3 &p0, const glm::vec3 &p1, const glm::vec3 &p2);
     Triangle(const glm::vec3 &p0, const glm::vec3 &p1, const glm::vec3 &p2,
              const glm::vec3 &n0, const glm::vec3 &n1, const glm::vec3 &n2)
         : positions_({p0, p1, p2}), normals_({n0, n1, n2}) {}

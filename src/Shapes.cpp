@@ -37,6 +37,14 @@ bool Sphere::Intersects(const Ray &ray, float t_min, HitRecord &hit_record) {
     return false;
 }
 
+Triangle::Triangle(const glm::vec3 &p0, const glm::vec3 &p1,
+                   const glm::vec3 &p2) {
+    positions_ = {p0, p1, p2};
+    normals_ = {glm::normalize(glm::cross(p1 - p0, p2 - p0)),
+                glm::normalize(glm::cross(p2 - p1, p0 - p1)),
+                glm::normalize(glm::cross(p0 - p2, p1 - p2))};
+}
+
 bool Triangle::Intersects(const Ray &ray, float t_min, HitRecord &record) {
     glm::vec3 oc = ray.origin - translation_;
     glm::mat3 coeffs(1.f);

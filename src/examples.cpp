@@ -83,3 +83,67 @@ void bunny() {
     tracer.Render(scene, "bunny_cel.png", RenderStyle::Cel);
     tracer.Render(scene, "bunny_watercolor.png", RenderStyle::Watercolor);
 }
+
+void rustacean() {
+    Scene scene;
+    Tracer tracer(CameraSpec{glm::vec3{-2.f, 1.f, 1.8f},
+                             glm::vec3{1.0f, -0.5f, -1.0f},
+                             glm::vec3{0.0f, 1.0f, 0.0f}, 45.0f},
+                  512, 512, glm::vec3{0.1f, 0.7f, 0.2f}, 10);
+    Material orange;
+    orange.diffuse = glm::vec3(1.0f, 0.5f, 0.0f);
+    orange.specular = glm::vec3(0.5f, 0.5f, 0.5f);
+    orange.shininess = 10.0f;
+
+    auto rustacean =
+        std::unique_ptr<Mesh>(new Mesh(load_mesh_from_obj("rustacean.obj")));
+    auto rustacean_obj =
+        std::unique_ptr<Object>(new Object(std::move(rustacean)));
+    rustacean_obj->SetMaterial(orange);
+
+    auto point_light = std::unique_ptr<Light>(new PointLight(
+        glm::vec3{2.f, 4.f, 5.f}, glm::vec3{1.f, 1.f, 1.f}, glm::vec3(0.025f)));
+    auto ambient_light =
+        std::unique_ptr<Light>(new AmbientLight(glm::vec3(0.5f)));
+
+    scene.AddObject(std::move(rustacean_obj));
+    // scene.AddLight(std::move(directional_light));
+    scene.AddLight(std::move(point_light));
+    scene.AddLight(std::move(ambient_light));
+
+    tracer.Render(scene, "rustacean_real.png", RenderStyle::Real);
+    tracer.Render(scene, "rustacean_cel.png", RenderStyle::Cel);
+    tracer.Render(scene, "rustacean_watercolor.png", RenderStyle::Watercolor);
+}
+
+void teapot() {
+    Scene scene;
+    Tracer tracer(CameraSpec{glm::vec3{0.f, 1.f, 10.f},
+                             glm::vec3{0.0f, 0.0f, -1.0f},
+                             glm::vec3{0.0f, 1.0f, 0.0f}, 45.0f},
+                  512, 512, glm::vec3{0.1f, 0.3f, 0.2f}, 10);
+    Material silver;
+    silver.diffuse = glm::vec3(.7f, 0.8f, 0.9f);
+    silver.specular = glm::vec3(0.8f, 0.8f, 0.9f);
+    silver.shininess = 20.0f;
+
+    auto rustacean =
+        std::unique_ptr<Mesh>(new Mesh(load_mesh_from_obj("teapot.obj")));
+    auto rustacean_obj =
+        std::unique_ptr<Object>(new Object(std::move(rustacean)));
+    rustacean_obj->SetMaterial(silver);
+
+    auto point_light = std::unique_ptr<Light>(new PointLight(
+        glm::vec3{2.f, 4.f, 5.f}, glm::vec3{1.f, 1.f, 1.f}, glm::vec3(0.025f)));
+    auto ambient_light =
+        std::unique_ptr<Light>(new AmbientLight(glm::vec3(0.5f)));
+
+    scene.AddObject(std::move(rustacean_obj));
+    // scene.AddLight(std::move(directional_light));
+    scene.AddLight(std::move(point_light));
+    scene.AddLight(std::move(ambient_light));
+
+    tracer.Render(scene, "teapot_real.png", RenderStyle::Real);
+    tracer.Render(scene, "teapot_cel.png", RenderStyle::Cel);
+    tracer.Render(scene, "teapot_watercolor.png", RenderStyle::Watercolor);
+}

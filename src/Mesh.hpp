@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 struct MeshGroup {
@@ -34,9 +35,17 @@ class Mesh {
      * `indices`.
      */
     void UpdateNormals();
+    /**
+     * Assumes the OBJ file comes with vertex normals, and associates the
+     * vertex normals with the vertices in the mesh.
+     */
+    void AssociateNormals(
+        const std::unordered_map<unsigned int, unsigned int> &vtx_to_normal);
 
     std::vector<MeshGroup> groups;
     std::vector<Triangle> triangles;
+
+  private:
 };
 
 /**
