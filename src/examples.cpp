@@ -15,7 +15,7 @@ void ball() {
     Tracer tracer(CameraSpec{glm::vec3{0.f, 0.f, 6.f},
                              glm::vec3{0.f, 0.f, -1.0f},
                              glm::vec3{0.0f, 1.0f, 0.0f}, 45.0f},
-                  256, 256, glm::vec3{0.0f, 0.0f, 0.0f}, 10);
+                  256, 256, glm::vec3{0.6f, 0.7f, 1.0f}, 10);
     Material orange;
     orange.diffuse = glm::vec3(1.0f, 0.5f, 0.0f);
     orange.specular = glm::vec3(0.5f, 0.5f, 0.5f);
