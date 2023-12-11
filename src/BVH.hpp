@@ -6,6 +6,10 @@
 #include "Shapes.hpp"
 #include <vector>
 
+struct BoundingBox {
+    glm::vec3 min, max;
+};
+
 typedef unsigned int uint;
 struct BVHNode {
     glm::vec3 min, max;
@@ -14,13 +18,19 @@ struct BVHNode {
 class BVHObject {
   public:
     BVHObject(std::vector<Triangle> &triangles)
-        : nodes_created(0), triangles_(triangles){};
-    void ConstructBVH();
+        : nodes_created(0), triangles_(triangles) {
+        ConstructBVH();
+    };
     bool Intersects(const Ray &ray, float t_min, HitRecord &record,
                     uint node_id = 0);
+    /**
+     * Returns the bounding box of the whole BVH/mesh.
+     */
+    const BoundingBox &GetBoundingBox() const { return bounding_box_; }
 
   private:
     uint nodes_created;
+    BoundingBox bounding_box_;
     std::vector<BVHNode> nodes_;
     std::vector<Triangle> &triangles_;
     std::vector<glm::vec3> centroids_;
@@ -37,9 +47,15 @@ class BVHObject {
      * used to index into `triangle_indices_`.
      */
     std::vector<uint> triangle_indices_;
+
+    void ConstructBVH();
+
     /**
      * Sets the bounding box of a node in the BVH based on the triangles
      * currently assigned to the node.
+     *
+     * If `node_id` is the root node (i.e. 0), `bounding_box_` is set to the
+     * bounding box of the entire BVH.
      */
     void SetNodeBoundingBox(uint node_id);
     /**

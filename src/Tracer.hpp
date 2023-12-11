@@ -36,8 +36,19 @@ class Tracer {
     int max_bounces_;
     const Scene *scene_;
 
-    PixelInfo TraceRay(int x, int y, const Ray &ray, int bounces,
+    /**
+     * @param img_pos 2D image space position, coordinates range from -1 to 1
+     * @param ray The ray to trace
+     * @param bounces The number of bounces to trace recursively
+     * @param hit_record The hit record to update if the ray intersects with
+     *         an object
+     * @param style The render style to use
+     */
+    PixelInfo TraceRay(const glm::vec2 &img_pos, const Ray &ray, int bounces,
                        HitRecord &hit_record, RenderStyle style);
+
+    bool IsShadowed(const glm::vec3 &hit_pos, const glm::vec3 &dir_to_light,
+                    const float dist_to_light) const;
 };
 
 #endif

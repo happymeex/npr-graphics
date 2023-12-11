@@ -18,6 +18,7 @@ class Sphere : public Hittable {
 
 class Triangle : public Hittable {
   public:
+    Triangle(const glm::vec3 &p0, const glm::vec3 &p1, const glm::vec3 &p2);
     Triangle(const glm::vec3 &p0, const glm::vec3 &p1, const glm::vec3 &p2,
              const glm::vec3 &n0, const glm::vec3 &n1, const glm::vec3 &n2)
         : positions_({p0, p1, p2}), normals_({n0, n1, n2}) {}
@@ -37,6 +38,8 @@ class Plane : public Hittable {
   public:
     Plane(const glm::vec3 &normal, float d) : normal_(normal), d_(d){};
     bool Intersects(const Ray &ray, float t_min, HitRecord &record) override;
+    float GetDensity(const glm::vec2 &img_pos,
+                     const glm::vec3 &position) const override;
 
   private:
     glm::vec3 normal_;

@@ -107,6 +107,9 @@ void BVHObject::SetNodeBoundingBox(uint node_id) {
         node.max = glm::max(node.max, positions[1]);
         node.max = glm::max(node.max, positions[2]);
     }
+    if (node_id == 0) {
+        bounding_box_ = BoundingBox{node.min, node.max};
+    }
 }
 
 bool BVHObject::IntersectsBoundingBox(const Ray &ray, float t_min,

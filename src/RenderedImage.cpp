@@ -1,35 +1,53 @@
 #include "RenderedImage.hpp"
 #include <glm/gtx/string_cast.hpp>
 #include <iostream>
+#include <memory>
 
-// CEL
-
-void RenderedImage::DrawEdges(float edge_strength) {
-    const auto beta_edges = diffuse_.GetEdges();
-
-    // Multiply to get edged image
-    const auto multiply_inverse = [edge_strength](glm::vec3 a, glm::vec3 b) {
-        return a * (glm::vec3(1.0, 1.0, 1.0) - edge_strength * b);
-    };
-
-    final_ = final_.ApplyLayer(beta_edges, multiply_inverse);
-}
-
-// PIGMENT-BASED
-
-void RenderedImage::ApplyDensity() {
-    const auto apply_density = [this](glm::vec3 color,
-                                      glm::vec3 density) -> glm::vec3 {
-        glm::vec3 alpha = glm::vec3(1.f) + density;
-        glm::vec3 color_pow = glm::pow(color, alpha);
-        alpha = glm::clamp(alpha, 0.f, 1.f);
-        return alpha * color_pow +
-               (glm::vec3(1.f) - alpha) * WATERCOLOR_PAPER_COLOR;
-    };
-    final_ = final_.ApplyLayer(density_, apply_density);
-}
+RenderedImage::RenderedImage(const Image &color, const Image &diffuse,
+                             const Image &normal, const Image &depth,
+                             const Image &density, const Image &final)
+    : width_(final.GetWidth()), height_(final.GetHeight()), color_(color),
+      diffuse_(diffuse), normal_(normal), depth_(depth), density_(density),
+      paper_mask_(final.GetWidth(), final.GetHeight()), final_(final) {
+    paper_ =
+        std::unique_ptr<Paper>(new Paper("paper_uvh.txt", width_, height_, 45));
+    for (int y = 0; y < height_; y++) {
+        for (int x = 0; x < width_; x++) {
+            glm::vec3 paper_illumination = paper_->GetPaperIllumination(x, y);
+            paper_mask_.SetPixel(x, y, glm::vec4(paper_illumination, 1.0f),
+                                 false);
+        }
+    }
+    
+    min_depth_ = std::numeric_limits<float>::max();
+    for (int y = 0; y < height_; y++) {
+        for (int x = 0; x < width_; x++) {
+            min_depth_ = std::min(min_depth_, depth_.GetPixel(x, y)[0]);
+        }
+    }
+};
 
 // EDGE-BASED
+
+void RenderedImage::DrawDarkenedEdges(float edge_strength, int kernel_size) {
+    const auto beta_edges = diffuse_.GetEdges();
+    const auto blurred_edges = beta_edges.GaussianBlur(kernel_size);
+
+    Image darkened_edges{width_, height_};
+    for (int x = 0; x != width_; ++x) {
+        for (int y = 0; y != width_; ++y) {
+            glm::vec3 color = glm::clamp(blurred_edges.GetPixel(x, y) * min_depth_ / depth_.GetPixel(x, y)[0], 0.0f, 1.0f);
+            darkened_edges.SetPixel(x, y, glm::vec4(color, 1.0f));
+        }
+    }
+
+    // Multiply to get edged image
+    const auto color_modification = [edge_strength](glm::vec3 a, glm::vec3 b) {
+        return glm::pow(a, 1.0f + edge_strength*b*b);
+    };
+
+    final_ = final_.ApplyLayer(darkened_edges, color_modification);
+}
 
 glm::vec2 GetGradient(Image im, int x, int y) {
     auto w = im.GetWidth();
@@ -61,11 +79,9 @@ glm::vec2 GetGradient(Image im, int x, int y) {
     }
 }
 
-
-
 void RenderedImage::GapsAndOverlaps(int m, int p) {
     // edge image
-    const auto e = diffuse_.GetEdges();
+    const auto e = color_.GetEdges();
     // TODO: extended edge image, by applying a kernel of size 2m+1 on the edge image 
     const auto ee = e.GaussianBlur(m);
     // substrate color
@@ -83,6 +99,9 @@ void RenderedImage::GapsAndOverlaps(int m, int p) {
                 if (ee.GetPixel(x, y)[0] > 0.2) {
                     // TODO: Get gradient by fetching neighbor pixels
                     auto g = GetGradient(ee, x, y);
+                    // if (glm::length(g) == 0 && ee.GetPixel(x, y)[0] > 0) {
+                    //     std::cout << x << ' ' << y << std::endl;
+                    // }
                     // OVERLAPS
                     if (p > 0) {
                         for (int i = 0; i <= p; ++i) {
@@ -92,7 +111,7 @@ void RenderedImage::GapsAndOverlaps(int m, int p) {
                             auto cn = GetRGBD(new_x, new_y, false);
                             // Check for difference in RGBD space
                             if (glm::length(cn - current) > 0.5f) {
-                                // If not substract, mix
+                                // If not substrate, mix
                                 if (glm::vec3(cn) != cs) {
                                     // Mix colors
                                     // TODO: RYB space conversion
@@ -172,19 +191,19 @@ void RenderedImage::Bleed(Image mask, int kernel_size, float depth_threshold) {
                         bled_image.SetPixel(x, y,
                                             bled_image.GetPixel(x, y) +
                                                 final_.GetPixel(x_shift, y) *
-                                                    kernel_weights.at(i + 10));
+                                                    kernel_weights.at(i + kernel_size));
                     } else {
                         // Add weighted source color
                         bled_image.SetPixel(x, y,
                                             bled_image.GetPixel(x, y) +
                                                 final_.GetPixel(x, y) *
-                                                    kernel_weights.at(i + 10));
+                                                    kernel_weights.at(i + kernel_size));
                     }
                 } else {
                     bled_image.SetPixel(x, y,
                                         bled_image.GetPixel(x, y) +
                                             final_.GetPixel(x, y) *
-                                                kernel_weights.at(i + 10));
+                                                kernel_weights.at(i + kernel_size));
                 }
             }
             // TODO: control image mask logic
@@ -193,4 +212,35 @@ void RenderedImage::Bleed(Image mask, int kernel_size, float depth_threshold) {
     }
 
     final_ = bled_image;
+}
+
+void RenderedImage::DrawEdges(float edge_strength) {
+    const auto beta_edges = diffuse_.GetEdges();
+
+    // Multiply to get edged image
+    const auto multiply_inverse = [edge_strength](glm::vec3 a, glm::vec3 b) {
+        return a * (glm::vec3(1.0, 1.0, 1.0) - edge_strength * b);
+    };
+
+    final_ = final_.ApplyLayer(beta_edges, multiply_inverse);
+}
+
+void RenderedImage::ApplyDensity() {
+    const auto apply_density = [this](glm::vec3 color,
+                                      glm::vec3 density) -> glm::vec3 {
+        glm::vec3 alpha = glm::vec3(1.f) + density;
+        glm::vec3 color_pow = glm::pow(color, alpha);
+        alpha = glm::clamp(alpha, 0.f, 1.f);
+        return alpha * color_pow +
+               (glm::vec3(1.f) - alpha) * WATERCOLOR_PAPER_COLOR;
+    };
+    final_ = final_.ApplyLayer(density_, apply_density);
+}
+
+void RenderedImage::ApplyPaperTexture() {
+    const auto apply_paper_texture =
+        [this](glm::vec3 color, glm::vec3 paper_illumination) -> glm::vec3 {
+        return color * paper_illumination;
+    };
+    final_ = final_.ApplyLayer(paper_mask_, apply_paper_texture);
 }

@@ -37,6 +37,14 @@ bool Sphere::Intersects(const Ray &ray, float t_min, HitRecord &hit_record) {
     return false;
 }
 
+Triangle::Triangle(const glm::vec3 &p0, const glm::vec3 &p1,
+                   const glm::vec3 &p2) {
+    positions_ = {p0, p1, p2};
+    normals_ = {glm::normalize(glm::cross(p1 - p0, p2 - p0)),
+                glm::normalize(glm::cross(p2 - p1, p0 - p1)),
+                glm::normalize(glm::cross(p0 - p2, p1 - p2))};
+}
+
 bool Triangle::Intersects(const Ray &ray, float t_min, HitRecord &record) {
     glm::vec3 oc = ray.origin - translation_;
     glm::mat3 coeffs(1.f);
@@ -67,4 +75,13 @@ bool Plane::Intersects(const Ray &ray, float t_min, HitRecord &record) {
     record.time = t;
     record.normal = normal_;
     return true;
+}
+
+float Plane::GetDensity(const glm::vec2 &img_pos,
+                        const glm::vec3 &position) const {
+    float scale = 2.f;
+    float x = scale * img_pos.x, y = scale * img_pos.y;
+    float density =
+        (float)(pigment_density_perlin_.normalizedOctave2D(x, y, 2));
+    return 0.7f * (float)density;
 }

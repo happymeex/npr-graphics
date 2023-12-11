@@ -24,7 +24,8 @@ class Hittable {
     void SetMaterial(Material &material) { material_ = material; }
     Material GetMaterial() { return material_; }
     void Translate(glm::vec3 translation) { translation_ += translation; }
-    virtual float GetDensity(glm::vec3 position) const;
+    virtual float GetDensity(const glm::vec2 &img_pos,
+                             const glm::vec3 &position) const;
 
   protected:
     Material material_;

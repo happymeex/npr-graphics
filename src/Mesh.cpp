@@ -5,21 +5,30 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 
 void Mesh::UpdateTriangles() {
     triangles.clear();
     for (size_t i = 0; i < indices->size(); i += 3) {
-        Triangle triangle = Triangle{
-            vertices->at(indices->at(i)),     vertices->at(indices->at(i + 1)),
-            vertices->at(indices->at(i + 2)), normals->at(indices->at(i)),
-            normals->at(indices->at(i + 1)),  normals->at(indices->at(i + 2))};
+        int j1 = indices->at(i);
+        int j2 = indices->at(i + 1);
+        int j3 = indices->at(i + 2);
+        auto v1 = vertices->at(j1);
+        auto v2 = vertices->at(j2);
+        auto v3 = vertices->at(j3);
+        Triangle triangle = Triangle(v1, v2, v3);
+        if (j1 < (int)normals->size() && j2 < (int)normals->size() &&
+            j3 < (int)normals->size()) {
+            triangle = Triangle(v1, v2, v3, normals->at(j1), normals->at(j2),
+                                normals->at(j3));
+        }
         triangles.push_back(triangle);
     }
 }
 
 void Mesh::UpdateNormals() {
     normals->clear();
-    normals->resize(vertices->size(), glm::vec3(0.0f, 0.0f, 0.0f));
+    normals->resize(vertices->size(), glm::vec3(0.f, 0.f, 0.f));
     for (size_t i = 0; i < indices->size(); i += 3) {
         int v1 = indices->at(i);
         int v2 = indices->at(i + 1);
@@ -49,6 +58,8 @@ Mesh load_mesh_from_obj(const std::string &file_name) {
     std::vector<glm::vec3> normals;
     std::vector<unsigned int> indices;
     std::vector<glm::vec2> tex_coords;
+
+    std::unordered_map<unsigned int, unsigned int> vtx_to_normal;
 
     MeshGroup current_group;
     Mesh mesh;
@@ -80,7 +91,11 @@ Mesh load_mesh_from_obj(const std::string &file_name) {
                 if (str.find('/') == std::string::npos) {
                     idx = std::stoul(str);
                 } else {
-                    idx = std::stoul(util::split_str(str, '/').at(0));
+                    auto split = util::split_str(str, '/');
+                    idx = std::stoul(split[0]);
+                    if (split.size() == 3) {
+                        vtx_to_normal[idx - 1] = std::stoul(split[2]) - 1;
+                    }
                 }
                 indices.push_back(idx - 1);
             }
@@ -120,8 +135,11 @@ Mesh load_mesh_from_obj(const std::string &file_name) {
     mesh.tex_coords = std::make_unique<std::vector<glm::vec2>>(tex_coords);
 
     if (mesh.normals->empty()) {
-        // normals not provided, compute them based on vertices and faces
+        // no normals provided, compute them based on vertices and faces
         mesh.UpdateNormals();
+    } else {
+        // all normals provided
+        mesh.AssociateNormals(vtx_to_normal);
     }
     mesh.UpdateTriangles();
 
@@ -131,4 +149,18 @@ Mesh load_mesh_from_obj(const std::string &file_name) {
     }
 
     return mesh;
+}
+
+void Mesh::AssociateNormals(
+    const std::unordered_map<unsigned int, unsigned int> &vtx_to_normal) {
+    std::vector<glm::vec3> new_normals;
+    for (unsigned int i = 0; i < (unsigned int)vertices->size(); i++) {
+        auto it = vtx_to_normal.find(i);
+        if (it != vtx_to_normal.end()) {
+            new_normals.push_back(normals->at(it->second));
+        } else {
+            new_normals.push_back({0, 0, 0});
+        }
+    }
+    normals = std::make_unique<std::vector<glm::vec3>>(new_normals);
 }

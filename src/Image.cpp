@@ -16,7 +16,7 @@ const glm::vec4 &Image::GetPixel(int x, int y, bool strict) const {
 }
 void Image::SetPixel(int x, int y, glm::vec4 color, bool clip) {
     if (x < 0 || x >= width_ || y < 0 || y >= height_) {
-        throw "Image SetPixel: index out of range";
+        throw std::runtime_error("Image SetPixel: index out of range");
     }
     if (clip) {
         data_[y * width_ + x] = glm::clamp(color, 0.0f, 1.0f);
@@ -79,8 +79,7 @@ Image Image::ApplyLayer(
     return result;
 }
 
-Image Image::ApplyFilter(const std::vector<std::vector<float>> &filter, bool on_transparency,
-                         bool clip) const {
+Image Image::ApplyFilter(const std::vector<std::vector<float>> &filter, bool on_transparency, bool clip) const {
 
     int n = filter.size();
     
@@ -96,7 +95,7 @@ Image Image::ApplyFilter(const std::vector<std::vector<float>> &filter, bool on_
 
     for (int x = 0; x < n; ++x) {
         for (int y = 0; y < n; ++y) {
-            normalizer += filter[x][y];
+            normalizer += filter.at(x).at(y);
         }
     }
 
@@ -118,7 +117,7 @@ Image Image::ApplyFilter(const std::vector<std::vector<float>> &filter, bool on_
                         auto true_x = std::min(std::max(0, x + i), upper_bound);
                         auto true_y = std::min(std::max(0, y + j), lower_bound);
                         pixel +=
-                            filter[i + m][j + m] * GetPixel(true_x, true_y);
+                            filter.at(i+m).at(j+m) * GetPixel(true_x, true_y);
                     }
                 }
                 result.SetPixel(x, y, normalizer * pixel);
@@ -129,7 +128,7 @@ Image Image::ApplyFilter(const std::vector<std::vector<float>> &filter, bool on_
                     for (int j = -m; j <= m; ++j) {
                         auto true_x = std::min(std::max(0, x + i), upper_bound);
                         auto true_y = std::min(std::max(0, y + j), lower_bound);
-                        pixel += filter[i + m][j + m] *
+                        pixel += filter.at(i+m).at(j+m) *
                                  glm::vec3(GetPixel(true_x, true_y));
                     }
                 }
@@ -158,7 +157,7 @@ Image Image::GaussianBlur(int m, float sigma) const {
     for (int i = 0; i != weights_1d.size(); ++i) {
         weights_2d.push_back({});
         for (int j = 0; j != weights_1d.size(); ++j) {
-            weights_2d[i].push_back(weights_1d.at(i) * weights_1d.at(j));
+            weights_2d.at(i).push_back(weights_1d.at(i) * weights_1d.at(j));
         }
     }
 

@@ -8,7 +8,8 @@ Hittable::Hittable() {
     pigment_density_perlin_ = siv::PerlinNoise(seed);
 }
 
-float Hittable::GetDensity(glm::vec3 position) const {
+float Hittable::GetDensity(const glm::vec2 &img_pos,
+                           const glm::vec3 &position) const {
     float density = (float)(pigment_density_perlin_.normalizedOctave3D(
         position.x, position.y, position.z, 2));
     // TODO: Better way to do this
