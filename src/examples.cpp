@@ -89,7 +89,7 @@ void rustacean() {
     Tracer tracer(CameraSpec{glm::vec3{-2.f, 1.f, 1.8f},
                              glm::vec3{1.0f, -0.5f, -1.0f},
                              glm::vec3{0.0f, 1.0f, 0.0f}, 45.0f},
-                  512, 512, glm::vec3{0.1f, 0.7f, 0.2f}, 10);
+                  512, 512, glm::vec3{0.1f, 0.1f, 0.2f}, 10);
     Material orange;
     orange.diffuse = glm::vec3(1.0f, 0.5f, 0.0f);
     orange.specular = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -102,6 +102,8 @@ void rustacean() {
     auto plane =
         std::unique_ptr<Plane>(new Plane(glm::vec3{0.f, 1.f, 0.f}, 0.12f));
     plane->SetMaterial(white);
+    plane->SetDensitySeed(7);
+    plane->SetDensityStrength(0.5f);
 
     auto rustacean =
         std::unique_ptr<Mesh>(new Mesh(load_mesh_from_obj("rustacean.obj")));

@@ -26,5 +26,5 @@ float Object::GetDensity(const glm::vec2 &img_pos,
     float density =
         (float)(pigment_density_perlin_.normalizedOctave3D(x, y, z, 1));
 
-    return 0.5f * density;
+    return 0.5f * density_strength_ * density;
 }

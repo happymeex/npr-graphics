@@ -83,5 +83,5 @@ float Plane::GetDensity(const glm::vec2 &img_pos,
     float x = scale * img_pos.x, y = scale * img_pos.y;
     float density =
         (float)(pigment_density_perlin_.normalizedOctave2D(x, y, 2));
-    return 0.7f * (float)density;
+    return 0.7f * density_strength_ * (float)density;
 }
