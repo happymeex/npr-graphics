@@ -86,13 +86,13 @@ void Tracer::Render(const Scene &scene, const std::string &out_file_name,
         Image mask{width_, height_};
         for (int y = 0; y < height_; y++) {
             for (int x = 0; x < width_; x++) {
-                if ((x%50 < 25 & y%50 < 25) || (x%50 >= 25 && y%50 >= 25)) {
+                if ((x % 50 < 25 && y % 50 < 25) ||
+                    (x % 50 >= 25 && y % 50 >= 25)) {
                     mask.SetPixel(x, y, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
                 }
             }
         }
         rendered_image.Bleed(mask, 3);
-
 
         rendered_image.GetFinal().SavePNG(out_file_name);
     }

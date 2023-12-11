@@ -4,8 +4,8 @@
 
 const glm::vec4 &Image::GetPixel(int x, int y, bool strict) const {
     if (!strict) {
-        x = std::max(std::min(x, width_-1), 0);
-        y = std::max(std::min(y, width_-1), 0);
+        x = std::max(std::min(x, width_ - 1), 0);
+        y = std::max(std::min(y, width_ - 1), 0);
     }
     if (x < width_ && y < height_) {
         return data_[y * width_ + x];
@@ -23,7 +23,6 @@ void Image::SetPixel(int x, int y, glm::vec4 color, bool clip) {
     } else {
         data_[y * width_ + x] = color;
     }
-    
 }
 void Image::SavePNG(const std::string &file_name) const {
     std::cout << "Saving image to " << file_name << std::endl;
@@ -79,10 +78,11 @@ Image Image::ApplyLayer(
     return result;
 }
 
-Image Image::ApplyFilter(const std::vector<std::vector<float>> &filter, bool on_transparency, bool clip) const {
+Image Image::ApplyFilter(const std::vector<std::vector<float>> &filter,
+                         bool on_transparency, bool clip) const {
 
     int n = filter.size();
-    
+
     if (n % 2 != 1) {
         throw std::invalid_argument("Filter must be a square of odd size");
     }
@@ -116,8 +116,8 @@ Image Image::ApplyFilter(const std::vector<std::vector<float>> &filter, bool on_
                     for (int j = -m; j <= m; ++j) {
                         auto true_x = std::min(std::max(0, x + i), upper_bound);
                         auto true_y = std::min(std::max(0, y + j), lower_bound);
-                        pixel +=
-                            filter.at(i+m).at(j+m) * GetPixel(true_x, true_y);
+                        pixel += filter.at(i + m).at(j + m) *
+                                 GetPixel(true_x, true_y);
                     }
                 }
                 result.SetPixel(x, y, normalizer * pixel);
@@ -128,7 +128,7 @@ Image Image::ApplyFilter(const std::vector<std::vector<float>> &filter, bool on_
                     for (int j = -m; j <= m; ++j) {
                         auto true_x = std::min(std::max(0, x + i), upper_bound);
                         auto true_y = std::min(std::max(0, y + j), lower_bound);
-                        pixel += filter.at(i+m).at(j+m) *
+                        pixel += filter.at(i + m).at(j + m) *
                                  glm::vec3(GetPixel(true_x, true_y));
                     }
                 }
@@ -154,9 +154,9 @@ Image Image::GaussianBlur(int m, float sigma) const {
     auto weights_1d = CalculateKernelWeights(m, sigma);
     std::vector<std::vector<float>> weights_2d;
 
-    for (int i = 0; i != weights_1d.size(); ++i) {
+    for (size_t i = 0; i != weights_1d.size(); ++i) {
         weights_2d.push_back({});
-        for (int j = 0; j != weights_1d.size(); ++j) {
+        for (size_t j = 0; j != weights_1d.size(); ++j) {
             weights_2d.at(i).push_back(weights_1d.at(i) * weights_1d.at(j));
         }
     }

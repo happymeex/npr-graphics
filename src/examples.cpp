@@ -94,6 +94,14 @@ void rustacean() {
     orange.diffuse = glm::vec3(1.0f, 0.5f, 0.0f);
     orange.specular = glm::vec3(0.5f, 0.5f, 0.5f);
     orange.shininess = 10.0f;
+    Material white;
+    white.diffuse = glm::vec3(.6f, .6f, .6f);
+    white.specular = glm::vec3(0.2f, 0.2f, 0.2f);
+    white.shininess = 10.0f;
+
+    auto plane =
+        std::unique_ptr<Plane>(new Plane(glm::vec3{0.f, 1.f, 0.f}, 0.12f));
+    plane->SetMaterial(white);
 
     auto rustacean =
         std::unique_ptr<Mesh>(new Mesh(load_mesh_from_obj("rustacean.obj")));
@@ -107,7 +115,7 @@ void rustacean() {
         std::unique_ptr<Light>(new AmbientLight(glm::vec3(0.5f)));
 
     scene.AddObject(std::move(rustacean_obj));
-    // scene.AddLight(std::move(directional_light));
+    scene.AddObject(std::move(plane));
     scene.AddLight(std::move(point_light));
     scene.AddLight(std::move(ambient_light));
 
