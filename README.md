@@ -3,6 +3,12 @@
 This repo contains source code for a CPU-based ray tracer
 that produces images in watercolor and cel-shaded styles.
 
+![ball-cell](https://i.imgur.com/7KzTXLx.png)
+![ball-watercolor](https://i.imgur.com/JTKmvTA.png)
+
+![teapot-cell](https://imgur.com/gFNSB6i.png)
+![teapot-watercolor](https://imgur.com/CBWA0X2.png)
+
 ## Setup
 
 Download the following and put them in the `external/` directory:
@@ -13,6 +19,11 @@ Download the following and put them in the `external/` directory:
 
 ## Usage
 
-Run `make` to generate an executable.
-Run `./bin/main` to run it.
-Any output PNGs should be found in `out/`.
+Run `make` to generate an executable and `./bin/main` to run it.
+This renders four example scenes whose output PNGs can be found in `out/`.
+You can find the code and API usage in `src/examples.cpp`.
+
+## Acknowledgments
+
+This code was written by Maxwell Jiang and Daniel Hu for MIT's 6.4400 Computer Graphics course.
+The watercolor algorithms are based on those described in Santiago Montesdeoca's [thesis](https://artineering.io/publications/real-time-watercolor-rendering-of-3d-objects-and-animation-with-enhanced-control).
