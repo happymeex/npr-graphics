@@ -20,9 +20,9 @@ float Object::GetDensity(const glm::vec2 &img_pos,
     float x = 2.f * (position.x - bbox.min.x) / (bbox.max.x - bbox.min.x) - 1.f;
     float y = 2.f * (position.y - bbox.min.y) / (bbox.max.y - bbox.min.y) - 1.f;
     float z = 2.f * (position.z - bbox.min.z) / (bbox.max.z - bbox.min.z) - 1.f;
-    x = scale * x;
-    y = scale * y;
-    z = scale * z;
+    x = scale * density_scale_ * x;
+    y = scale * density_scale_ * y;
+    z = scale * density_scale_ * z;
     float density =
         (float)(pigment_density_perlin_.normalizedOctave3D(x, y, z, 1));
 

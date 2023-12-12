@@ -10,6 +10,12 @@
 #include <iostream>
 #include <vector>
 
+void output_all(Scene &scene, Tracer &tracer, const std::string &filename) {
+    tracer.Render(scene, filename + "_real.png", RenderStyle::Real);
+    tracer.Render(scene, filename + "_cel.png", RenderStyle::Cel);
+    tracer.Render(scene, filename + "_watercolor.png", RenderStyle::Watercolor);
+}
+
 void ball() {
     Scene scene;
     Tracer tracer(CameraSpec{glm::vec3{0.f, 0.f, 6.f},
@@ -43,9 +49,7 @@ void ball() {
     scene.AddLight(std::move(point_light));
     scene.AddLight(std::move(ambient_light));
 
-    tracer.Render(scene, "ball_real.png", RenderStyle::Real);
-    tracer.Render(scene, "ball_cel.png", RenderStyle::Cel);
-    tracer.Render(scene, "ball_watercolor.png", RenderStyle::Watercolor);
+    output_all(scene, tracer, "ball");
 }
 
 void bunny() {
@@ -78,35 +82,38 @@ void bunny() {
     scene.AddLight(std::move(directional_light));
     scene.AddLight(std::move(directional_light2));
     scene.AddLight(std::move(ambient_light));
-    tracer.Render(scene, "bunny_real.png", RenderStyle::Real);
-    tracer.Render(scene, "bunny_cel.png", RenderStyle::Cel);
-    tracer.Render(scene, "bunny_watercolor.png", RenderStyle::Watercolor);
+
+    output_all(scene, tracer, "bunny");
 }
 
 void rustacean() {
     Scene scene;
-    Tracer tracer(CameraSpec{glm::vec3{-2.f, 1.f, 1.8f},
-                             glm::vec3{1.0f, -0.5f, -1.0f},
+    Tracer tracer(CameraSpec{glm::vec3{-2.f, 1.0f, 1.8f},
+                             glm::vec3{1.0f, -0.7f, -1.0f},
                              glm::vec3{0.0f, 1.0f, 0.0f}, 45.0f},
                   512, 512, glm::vec3{0.1f, 0.1f, 0.2f}, 10);
     Material orange;
     orange.diffuse = glm::vec3(1.0f, 0.5f, 0.0f);
     orange.specular = glm::vec3(0.5f, 0.5f, 0.5f);
     orange.shininess = 10.0f;
-    Material white;
-    white.diffuse = glm::vec3(.6f, .6f, .6f);
-    white.specular = glm::vec3(0.2f, 0.2f, 0.2f);
-    white.shininess = 10.0f;
+    Material green;
+    green.diffuse = glm::vec3(.6f, 1.f, .6f);
+    green.specular = glm::vec3(0.2f, 0.2f, 0.2f);
+    green.shininess = 10.0f;
 
     auto plane = std::make_unique<Plane>(glm::vec3{0.f, 1.f, 0.f}, 0.12f);
-    plane->SetMaterial(white);
+    plane->SetMaterial(green);
     plane->SetDensitySeed(7);
     plane->SetDensityStrength(0.5f);
 
     auto rustacean =
         std::make_unique<Mesh>(load_mesh_from_obj("rustacean.obj"));
     auto rustacean_obj = std::make_unique<Object>(std::move(rustacean));
+    rustacean_obj->Translate(glm::vec3(-0.5f, 0.f, 0.2f));
     rustacean_obj->SetMaterial(orange);
+    rustacean_obj->SetDensityStrength(1.5f);
+    rustacean_obj->SetDensitySeed(7);
+    rustacean_obj->SetDensityScale(1.5f);
 
     auto point_light = std::unique_ptr<Light>(new PointLight(
         glm::vec3{2.f, 4.f, 5.f}, glm::vec3{1.f, 1.f, 1.f}, glm::vec3(0.025f)));
@@ -118,9 +125,7 @@ void rustacean() {
     scene.AddLight(std::move(point_light));
     scene.AddLight(std::move(ambient_light));
 
-    tracer.Render(scene, "rustacean_real.png", RenderStyle::Real);
-    tracer.Render(scene, "rustacean_cel.png", RenderStyle::Cel);
-    tracer.Render(scene, "rustacean_watercolor.png", RenderStyle::Watercolor);
+    output_all(scene, tracer, "rustacean");
 }
 
 void teapot() {
@@ -176,7 +181,5 @@ void teapot() {
     scene.AddLight(std::move(point_light));
     scene.AddLight(std::move(ambient_light));
 
-    tracer.Render(scene, "teapot_real.png", RenderStyle::Real);
-    tracer.Render(scene, "teapot_cel.png", RenderStyle::Cel);
-    tracer.Render(scene, "teapot_watercolor.png", RenderStyle::Watercolor);
+    output_all(scene, tracer, "teapot");
 }
