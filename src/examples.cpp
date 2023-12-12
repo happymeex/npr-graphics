@@ -103,8 +103,7 @@ void rustacean() {
 
     auto plane = std::make_unique<Plane>(glm::vec3{0.f, 1.f, 0.f}, 0.12f);
     plane->SetMaterial(green);
-    plane->SetDensitySeed(7);
-    plane->SetDensityStrength(0.5f);
+    plane->SetDensitySeed(9);
 
     auto rustacean =
         std::make_unique<Mesh>(load_mesh_from_obj("rustacean.obj"));
