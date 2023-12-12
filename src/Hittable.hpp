@@ -36,11 +36,13 @@ class Hittable {
                              const glm::vec3 &position) const;
     void SetDensitySeed(int seed) { pigment_density_perlin_.reseed(seed); }
     void SetDensityStrength(float strength) { density_strength_ = strength; }
+    void SetDensityScale(float scale) { density_scale_ = scale; }
 
   protected:
     Material material_;
     glm::vec3 translation_;
     float density_strength_ = 1.0f;
+    float density_scale_ = 1.0f;
 
     siv::PerlinNoise pigment_density_perlin_;
 };

@@ -55,16 +55,15 @@ void bunny() {
                              glm::vec3{0.0f, 1.0f, 0.0f}, 25.0f},
                   256, 256, glm::vec3{0.1f, 0.7f, 0.2f}, 10);
 
-    Material silver;
-    silver.diffuse = glm::vec3(0.79f, 0.66f, 0.44f);
-    silver.specular = glm::vec3(1.f, 1.f, 1.f);
-    silver.shininess = 20.0f;
+    Material brown;
+    brown.diffuse = glm::vec3(0.79f, 0.66f, 0.44f);
+    brown.specular = glm::vec3(1.f, 1.f, 1.f);
+    brown.shininess = 20.0f;
 
-    auto bunny =
-        std::unique_ptr<Mesh>(new Mesh(load_mesh_from_obj("bunny_200.obj")));
+    auto bunny = std::make_unique<Mesh>(load_mesh_from_obj("bunny_200.obj"));
 
-    auto bunny_obj = std::unique_ptr<Object>(new Object(std::move(bunny)));
-    bunny_obj->SetMaterial(silver);
+    auto bunny_obj = std::make_unique<Object>(std::move(bunny));
+    bunny_obj->SetMaterial(brown);
 
     auto directional_light =
         std::unique_ptr<DirectionalLight>(new DirectionalLight(
@@ -99,16 +98,14 @@ void rustacean() {
     white.specular = glm::vec3(0.2f, 0.2f, 0.2f);
     white.shininess = 10.0f;
 
-    auto plane =
-        std::unique_ptr<Plane>(new Plane(glm::vec3{0.f, 1.f, 0.f}, 0.12f));
+    auto plane = std::make_unique<Plane>(glm::vec3{0.f, 1.f, 0.f}, 0.12f);
     plane->SetMaterial(white);
     plane->SetDensitySeed(7);
     plane->SetDensityStrength(0.5f);
 
     auto rustacean =
-        std::unique_ptr<Mesh>(new Mesh(load_mesh_from_obj("rustacean.obj")));
-    auto rustacean_obj =
-        std::unique_ptr<Object>(new Object(std::move(rustacean)));
+        std::make_unique<Mesh>(load_mesh_from_obj("rustacean.obj"));
+    auto rustacean_obj = std::make_unique<Object>(std::move(rustacean));
     rustacean_obj->SetMaterial(orange);
 
     auto point_light = std::unique_ptr<Light>(new PointLight(
@@ -128,28 +125,54 @@ void rustacean() {
 
 void teapot() {
     Scene scene;
-    Tracer tracer(CameraSpec{glm::vec3{0.f, 1.f, 10.f},
-                             glm::vec3{0.0f, 0.0f, -1.0f},
+    Tracer tracer(CameraSpec{glm::vec3{0.f, 5.2f, 8.f},
+                             glm::vec3{0.0f, -0.5f, -1.0f},
                              glm::vec3{0.0f, 1.0f, 0.0f}, 45.0f},
-                  512, 512, glm::vec3{0.1f, 0.3f, 0.2f}, 10);
+                  512, 512, glm::vec3{0.8f, 0.6f, 0.2f}, 10);
     Material silver;
     silver.diffuse = glm::vec3(.7f, 0.8f, 0.9f);
-    silver.specular = glm::vec3(0.8f, 0.8f, 0.9f);
-    silver.shininess = 20.0f;
+    silver.specular = glm::vec3(0.8f, 0.4f, 0.2f);
+    silver.shininess = 5.0f;
+    Material wood;
+    wood.diffuse = glm::vec3(0.3f, 0.2f, 0.1f);
+    wood.specular = glm::vec3(0.8f, 0.4f, 0.2f);
+    wood.shininess = 15.0f;
+    Material pink;
+    pink.diffuse = glm::vec3(.8f, 0.3f, 0.5f);
+    pink.specular = glm::vec3(0.9f, 0.9f, 0.7f);
+    pink.shininess = 20.0f;
 
-    auto rustacean =
-        std::unique_ptr<Mesh>(new Mesh(load_mesh_from_obj("teapot.obj")));
-    auto rustacean_obj =
-        std::unique_ptr<Object>(new Object(std::move(rustacean)));
-    rustacean_obj->SetMaterial(silver);
+    auto sphere = std::make_unique<Sphere>(glm::vec3(0.f), 3.0f);
+    sphere->Translate(glm::vec3{-1.f, 3.12f, -4.f});
+    sphere->SetMaterial(pink);
+    sphere->SetDensityStrength(0.5f);
+    sphere->SetDensityScale(0.4f);
+
+    auto small_sphere =
+        std::make_unique<Sphere>(glm::vec3(1.f, 1.12f, 2.f), .5f);
+    small_sphere->Translate(glm::vec3{0.3f, 0.f, 0.5f});
+    small_sphere->SetMaterial(pink);
+    small_sphere->SetDensityStrength(0.5f);
+
+    auto plane = std::make_unique<Plane>(glm::vec3{0.f, 1.f, 0.f}, -.12f);
+    plane->SetMaterial(wood);
+    plane->SetDensityStrength(0.5f);
+
+    auto teapot = std::make_unique<Mesh>(load_mesh_from_obj("teapot.obj"));
+    auto teapot_obj = std::unique_ptr<Object>(new Object(std::move(teapot)));
+    teapot_obj->SetMaterial(silver);
+    teapot_obj->SetDensityStrength(1.5f);
+    teapot_obj->SetDensitySeed(9);
 
     auto point_light = std::unique_ptr<Light>(new PointLight(
-        glm::vec3{2.f, 4.f, 5.f}, glm::vec3{1.f, 1.f, 1.f}, glm::vec3(0.025f)));
+        glm::vec3{3.f, 4.f, 3.f}, glm::vec3{.8f, .6f, .6f}, glm::vec3(0.1f)));
     auto ambient_light =
         std::unique_ptr<Light>(new AmbientLight(glm::vec3(0.5f)));
 
-    scene.AddObject(std::move(rustacean_obj));
-    // scene.AddLight(std::move(directional_light));
+    scene.AddObject(std::move(teapot_obj));
+    scene.AddObject(std::move(plane));
+    scene.AddObject(std::move(sphere));
+    scene.AddObject(std::move(small_sphere));
     scene.AddLight(std::move(point_light));
     scene.AddLight(std::move(ambient_light));
 

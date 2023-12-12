@@ -10,7 +10,10 @@ Hittable::Hittable() {
 
 float Hittable::GetDensity(const glm::vec2 &img_pos,
                            const glm::vec3 &position) const {
-    float density = (float)(pigment_density_perlin_.normalizedOctave3D(
-        position.x, position.y, position.z, 2));
+    float x = density_scale_ * position.x;
+    float y = density_scale_ * position.y;
+    float z = density_scale_ * position.z;
+    float density =
+        (float)(pigment_density_perlin_.normalizedOctave3D(x, y, z, 2));
     return density_strength_ * density;
 }
